@@ -179,12 +179,13 @@ details.past .trip { opacity: .75; }
 .cal-head h2 { font-family: var(--f-display); margin: 0 auto 0 0; font-size: 1.35rem; }
 .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
 .wd { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); text-align: center; font-weight: 700; padding-bottom: 2px; }
-.day { min-height: 90px; min-width: 0; border: 0; border-radius: 12px; background: var(--bg); padding: 5px; display: flex; flex-direction: column; gap: 3px; cursor: pointer; font: inherit; color: inherit; text-align: left; transition: background-color .12s ease; }
+.day { height: 90px; overflow: hidden; min-width: 0; border: 0; border-radius: 12px; background: var(--bg); padding: 5px; display: flex; flex-direction: column; gap: 3px; cursor: pointer; font: inherit; color: inherit; text-align: left; transition: background-color .12s ease; }
 .day:hover { background: var(--accent-soft); }
 .day.out { opacity: .4; }
 .day .n { font-size: .82rem; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 24px; height: 24px; display: grid; place-items: center; border-radius: 999px; align-self: flex-start; }
-.day.today .n { background: var(--accent); color: var(--accent-ink); }
-.day.sel { box-shadow: inset 0 0 0 2px var(--sun); }
+.day.is-today { background: var(--accent-soft); }
+.day.is-today .n { color: var(--accent); font-weight: 800; }
+.day.is-sel { box-shadow: inset 0 0 0 1.5px var(--accent); }
 .bar { --h: 30; display: block; font-size: .72rem; line-height: 1.4; padding: 1px 6px; border-radius: 6px; background: hsl(var(--h) 45% var(--chip-bg-l)); color: hsl(var(--h) 45% var(--chip-fg-l)); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .more { font-size: .7rem; color: var(--muted); padding-left: 4px; }
 .dayinfo { display: grid; gap: 12px; border-top: 1px solid var(--line); padding-top: 14px; }
@@ -194,7 +195,7 @@ details.past .trip { opacity: .75; }
 @media (max-width: 560px) {
   .cal { padding: 14px 10px; }
   .grid { gap: 3px; }
-  .day { min-height: 56px; padding: 3px; border-radius: 9px; }
+  .day { height: 56px; padding: 3px; border-radius: 9px; }
   .bar { font-size: 0; height: 6px; padding: 0; border-radius: 3px; background: hsl(var(--h) 45% var(--chip-dot-l)); }
   .more { font-size: .62rem; padding: 0; }
   .hero { padding-bottom: 180px; }
@@ -222,6 +223,14 @@ textarea { resize: vertical; min-height: 76px; }
 .opt[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .opt[aria-pressed="true"] .ic { color: currentColor; }
 .addname { display: flex; gap: 8px; }
+.going { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 54px; padding: 9px; border-radius: 14px; background: var(--bg); }
+.going .person { font-size: .95rem; padding-right: 3px; }
+.going .x { display: grid; place-items: center; width: 26px; height: 26px; margin-left: 1px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; }
+.going .x:hover { background: hsl(var(--h) 45% var(--chip-dot-l) / .22); }
+.going .x .ic { width: 14px; height: 14px; }
+.going > .hint { padding-inline: 6px; }
+.opt.add { border-style: dashed; color: var(--muted); }
+.opt.add:hover { color: var(--ink); border-style: solid; }
 .check { display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer; padding: 12px 14px; border-radius: 12px; background: var(--bg); }
 .check input { width: 20px; height: 20px; accent-color: var(--accent); }
 .hint { font-size: .86rem; color: var(--muted); margin: 0; font-weight: 400; }
@@ -329,11 +338,12 @@ textarea { resize: vertical; min-height: 76px; }
 
     <fieldset>
       <legend>Who's going?</legend>
-      <div class="pick" id="f-people"></div>
+      <div class="going" id="f-going" aria-live="polite"></div>
       <div class="addname">
-        <input type="text" id="f-newname" placeholder="Add a name" maxlength="40" autocomplete="off" aria-label="Add a name">
+        <input type="text" id="f-newname" placeholder="Type a name to add someone" maxlength="40" autocomplete="off" aria-label="Add someone by name">
         <button class="btn" type="button" id="f-addname">Add</button>
       </div>
+      <div class="pick" id="f-suggest"></div>
     </fieldset>
 
     <div class="two">
@@ -375,6 +385,8 @@ textarea { resize: vertical; min-height: 76px; }
     relax: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/>',
     gathering: '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M15.5 14.2c3 0 5.5 2 5.5 5.3"/>',
     other: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.2"/>',
+    x: '<path d="M6 6l12 12M18 6 6 18"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
     moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
   };
   function icon(name) {
@@ -626,7 +638,7 @@ textarea { resize: vertical; min-height: 76px; }
       const s = ymd(d);
       const on = S.trips.filter(x => x.start <= s && x.end >= s).sort(byStart);
       const names = uniq(on.flatMap(x => x.people));
-      const cls = ["day", d.getMonth() !== m - 1 && "out", s === t && "today", s === S.selDay && "sel"].filter(Boolean).join(" ");
+      const cls = ["day", d.getMonth() !== m - 1 && "out", s === t && "is-today", s === S.selDay && s !== t && "is-sel"].filter(Boolean).join(" ");
       grid.append(h("button", {
         class: cls, type: "button",
         "aria-label": fmt(s, { weekday: "long", month: "long", day: "numeric" }) + (names.length ? ": " + joinNames(names) : ": nobody"),
@@ -656,7 +668,7 @@ textarea { resize: vertical; min-height: 76px; }
     const count = new Map();
     for (const x of S.trips) for (const p of x.people) count.set(p, (count.get(p) || 0) + 1);
     const sorted = [...count.keys()].sort((a, b) => count.get(b) - count.get(a) || a.localeCompare(b));
-    return uniq([...F.people, ...sorted]);
+    return uniq([...F.people, ...sorted, ...(store.get("lastPeople") || []).filter(p => typeof p === "string")]);
   }
 
   function openForm(trip, day) {
@@ -686,18 +698,30 @@ textarea { resize: vertical; min-height: 76px; }
     dlg.showModal();
   }
 
+  // Who's going: chosen people show as chips with a remove button; everyone else
+  // the family has used before shows below as "+ Name" chips, filtered by what's typed.
   function renderPeoplePick() {
     const ro = !S.canWrite;
-    const box = $("#f-people");
-    const names = knownNames();
-    box.replaceChildren(...names.map(n => h("button", {
-      class: "opt", type: "button", disabled: ro, "aria-pressed": F.people.includes(n),
-      onclick: () => {
-        F.people = F.people.includes(n) ? F.people.filter(p => p !== n) : [...F.people, n];
-        renderPeoplePick();
-      },
-    }, n)));
-    if (!names.length) box.append(h("p", { class: "hint" }, "Type a name below. Names you add show up here as quick picks next time."));
+    const going = $("#f-going");
+    going.replaceChildren(...F.people.map(n => h("span", { class: "person", style: `--h:${hue(n)}` },
+      h("span", { class: "ini", "aria-hidden": "true" }, n[0].toUpperCase()),
+      h("span", { class: "nm" }, n),
+      !ro && h("button", {
+        class: "x", type: "button", "aria-label": `Remove ${n}`,
+        onclick: () => { F.people = F.people.filter(p => p !== n); renderPeoplePick(); },
+      }, icon("x")))));
+    if (!F.people.length) going.append(h("span", { class: "hint" }, "Nobody yet. Tap a name below or type one."));
+
+    const typed = $("#f-newname").value.trim().toLowerCase();
+    const chosen = new Set(F.people.map(p => p.toLowerCase()));
+    const rest = knownNames().filter(n => !chosen.has(n.toLowerCase()) && (!typed || n.toLowerCase().includes(typed)));
+    const sug = $("#f-suggest");
+    sug.hidden = ro || !rest.length;
+    sug.replaceChildren(...rest.map(n => h("button", {
+      class: "opt add", type: "button", "aria-label": `Add ${n}`,
+      onclick: () => { F.people = [...F.people, n]; $("#f-newname").value = ""; renderPeoplePick(); },
+    }, icon("plus"), n)));
+    $("#f-addname").disabled = ro || !typed;
   }
 
   function addName() {
@@ -750,7 +774,8 @@ textarea { resize: vertical; min-height: 76px; }
   });
   $("#f-staying").addEventListener("change", e => { F.staying = e.target.checked; });
   $("#f-notes").addEventListener("input", e => { F.notes = e.target.value; });
-  $("#f-addname").addEventListener("click", addName);
+  $("#f-addname").addEventListener("click", () => { addName(); $("#f-newname").focus(); });
+  $("#f-newname").addEventListener("input", renderPeoplePick);
   $("#f-newname").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addName(); } });
   $("#f-cancel").addEventListener("click", () => dlg.close());
   $("#f-x").addEventListener("click", () => dlg.close());
