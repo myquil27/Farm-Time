@@ -313,7 +313,7 @@ textarea { resize: vertical; min-height: 76px; }
     const id = await familyId(a);
     $("#rules").value = template
       .replace(/^\/\/.*\n/gm, "")
-      .replace("service cloud.firestore", "// Farm Time database rules: only the family code chosen on setup.html can read or add visits.\nservice cloud.firestore")
+      .replace("service cloud.firestore", "// Farm Time database rules: only the family code chosen on setup.html can read or add visits and to-dos.\nservice cloud.firestore")
       .replace("FAMILY_ID_GOES_HERE", id);
     $("#out").hidden = false;
     $("#out").scrollIntoView({ behavior: "smooth", block: "start" });

@@ -153,6 +153,26 @@ svg.ic { width: 16px; height: 16px; flex: none; }
 .tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--accent-soft); }
 .tab { font: inherit; font-weight: 600; border: 0; background: transparent; color: var(--muted); padding: 8px 18px; border-radius: 999px; cursor: pointer; min-height: 40px; }
 .tab[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 4px var(--shadow-2); }
+.tab .count { display: inline-block; margin-left: 6px; min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: .74rem; line-height: 20px; text-align: center; font-variant-numeric: tabular-nums; }
+
+/* Farm to-dos */
+.todos { padding: 18px; display: grid; gap: 14px; }
+.todo-add { display: flex; gap: 8px; }
+.todo-list { display: grid; gap: 8px; }
+.todo { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 14px; background: var(--bg); }
+.check { flex: none; width: 28px; height: 28px; margin-top: 1px; display: grid; place-items: center; border: 2px solid var(--accent); border-radius: 50%; background: transparent; color: var(--accent-ink); cursor: pointer; }
+.check[aria-checked="true"] { background: var(--accent); }
+.check:hover { background: var(--accent-soft); }
+.check[aria-checked="true"]:hover { filter: brightness(1.08); background: var(--accent); }
+.todo-body { flex: 1; min-width: 0; display: grid; gap: 6px; padding: 2px 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.todo-text { font-weight: 600; overflow-wrap: anywhere; }
+.todo.is-done .todo-text { text-decoration: line-through; color: var(--muted); font-weight: 500; }
+.due { display: inline-flex; align-items: center; gap: 6px; }
+.due.late { color: var(--danger); font-weight: 600; }
+.todo-hint { justify-self: start; justify-content: flex-start; text-align: left; padding-inline: 10px; }
+details.done-list summary { cursor: pointer; font-weight: 600; color: var(--muted); padding: 6px 0; }
+details.done-list .todo-list { margin-top: 6px; }
+.done-foot { display: flex; justify-content: flex-end; margin-top: 4px; }
 
 /* Trip rows */
 .list { display: grid; gap: 12px; }
@@ -317,11 +337,20 @@ textarea { resize: vertical; min-height: 76px; }
     <div class="tabs" role="group" aria-label="View">
       <button class="tab" id="tabList" type="button" aria-pressed="true">Coming up</button>
       <button class="tab" id="tabCal" type="button" aria-pressed="false">Calendar</button>
+      <button class="tab" id="tabTodo" type="button" aria-pressed="false">To-dos<span class="count" id="todoCount" hidden></span></button>
     </div>
   </div>
 
   <section id="listView" class="list"></section>
   <section id="calView" class="card cal" hidden></section>
+  <section id="todoView" class="card todos" hidden>
+    <div class="section-h"><h2>Farm to-dos</h2><span class="sub" id="todoSummary"></span></div>
+    <form class="todo-add" id="todoAdd" novalidate>
+      <input type="text" id="todoNew" placeholder="Add something that needs doing" maxlength="200" autocomplete="off" aria-label="New to-do">
+      <button class="btn primary" type="submit">Add</button>
+    </form>
+    <div id="todoList" class="todo-list"></div>
+  </section>
   <footer class="foot" id="foot" hidden>
     <button class="btn ghost" type="button" id="lockBtn">Use a different family code</button>
   </footer>
@@ -374,6 +403,40 @@ textarea { resize: vertical; min-height: 76px; }
   </form>
 </dialog>
 
+<dialog id="tdlg" aria-labelledby="t-title">
+  <form class="form" id="todoForm" novalidate>
+    <div class="form-h">
+      <h2 id="t-title">To-do</h2>
+      <button class="btn ghost icon" type="button" id="t-x" aria-label="Close">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <label class="field"><span class="lab">What needs doing?</span>
+      <textarea id="t-text" maxlength="200" rows="2"></textarea></label>
+    <fieldset>
+      <legend>Who's on it? <span class="hint">(optional)</span></legend>
+      <div class="pick" id="t-who"></div>
+      <div class="addname">
+        <input type="text" id="t-newname" placeholder="Someone else" maxlength="40" autocomplete="off" aria-label="Someone else">
+        <button class="btn" type="button" id="t-addname">Set</button>
+      </div>
+    </fieldset>
+    <div class="field">
+      <span class="lab">Needed by <span class="hint">(optional)</span></span>
+      <div class="addname">
+        <input type="date" id="t-due" aria-label="Needed by">
+        <button class="btn ghost" type="button" id="t-clear">Clear</button>
+      </div>
+    </div>
+    <p class="err" id="t-err" hidden></p>
+    <div class="actions">
+      <button class="btn danger left" type="button" id="t-del">Delete</button>
+      <button class="btn ghost" type="button" id="t-cancel">Cancel</button>
+      <button class="btn primary" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+
 <script src="config.js"></script>
 <script>
 (() => {
@@ -381,12 +444,13 @@ textarea { resize: vertical; min-height: 76px; }
     chores: '<path d="M12 21v-9"/><path d="M12 12c0-4 3-7 8-7 0 5-3 7-8 7z"/><path d="M12 14c0-3-2-6-7-6 0 4 2 6 7 6z"/>',
     project: '<path d="M14.5 3.5l6 6-3 3-6-6z"/><path d="M12.5 8.5 3.5 17.5l3 3 9-9"/>',
     hunting: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="1.5"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>',
-    fishing: '<path d="M2 12c3-4 7-6 11-4 2 1 3.5 2.5 4.5 4-1 1.5-2.5 3-4.5 4-4 2-8 0-11-4z"/><path d="M17.5 12 22 8.5v7z"/><circle cx="7.5" cy="11" r=".9" fill="currentColor"/>',
     relax: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/>',
     gathering: '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M15.5 14.2c3 0 5.5 2 5.5 5.3"/>',
     other: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.2"/>',
     x: '<path d="M6 6l12 12M18 6 6 18"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    list: '<path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11M3.5 18l1.5 1.5L7.5 17"/>',
     moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
   };
   function icon(name) {
@@ -401,7 +465,6 @@ textarea { resize: vertical; min-height: 76px; }
     { id: "chores", label: "Chores & upkeep" },
     { id: "project", label: "Repairs & projects" },
     { id: "hunting", label: "Hunting" },
-    { id: "fishing", label: "Fishing" },
     { id: "relax", label: "Getting away" },
     { id: "gathering", label: "Family gathering" },
     { id: "other", label: "Other" },
@@ -415,7 +478,8 @@ textarea { resize: vertical; min-height: 76px; }
 
   const S = {
     trips: [], status: "loading", family: null, canWrite: true,
-    view: store.get("view") === "cal" ? "cal" : "list", month: null, selDay: null,
+    view: ["cal", "todo"].includes(store.get("view")) ? store.get("view") : "list", month: null, selDay: null,
+    todos: [], todosError: null, doneOpen: false,
   };
 
   // ---- dates (local calendar days as YYYY-MM-DD strings) ----
@@ -509,9 +573,14 @@ textarea { resize: vertical; min-height: 76px; }
     $("#tabCal").setAttribute("aria-pressed", S.view === "cal");
     $("#listView").hidden = !ready || S.view !== "list";
     $("#calView").hidden = !ready || S.view !== "cal";
+    $("#tabTodo").setAttribute("aria-pressed", S.view === "todo");
+    $("#todoView").hidden = !ready || S.view !== "todo";
+    const open = openTodos().length;
+    $("#todoCount").hidden = !open;
+    $("#todoCount").textContent = String(open);
     renderGreet();
     renderToday();
-    if (S.view === "list") renderList(); else renderCal();
+    if (S.view === "list") renderList(); else if (S.view === "cal") renderCal(); else renderTodos();
   }
 
   function renderGreet() {
@@ -561,12 +630,17 @@ textarea { resize: vertical; min-height: 76px; }
     const here = hereToday();
     if (here.length) {
       el.append(h("div", { class: "section-h" }, h("h2", {}, "Up there now"), h("span", { class: "live" }, "Today")), ...here.map(x => tripRow(x, true)));
-      return;
+    } else {
+      const next = nextTrip();
+      if (next) el.append(h("div", { class: "section-h" }, h("h2", {}, "Next visit"), h("span", { class: "sub" }, relDay(next.start).replace(/^on /, ""))), tripRow(next));
+      else el.append(h("div", { class: "section-h" }, h("h2", {}, "No visits planned")),
+        h("p", { class: "sub" }, "Nobody's on the calendar. Heading up soon? Add it so everyone knows."));
     }
-    const next = nextTrip();
-    if (next) el.append(h("div", { class: "section-h" }, h("h2", {}, "Next visit"), h("span", { class: "sub" }, relDay(next.start).replace(/^on /, ""))), tripRow(next));
-    else el.append(h("div", { class: "section-h" }, h("h2", {}, "No visits planned")),
-      h("p", { class: "sub" }, "Nobody's on the calendar. Heading up soon? Add it so everyone knows."));
+    const open = openTodos().length;
+    if (open) el.append(h("button", {
+      class: "btn ghost todo-hint", type: "button",
+      onclick: () => { S.view = "todo"; store.set("view", "todo"); render(); $("#todoView").scrollIntoView({ behavior: "smooth", block: "start" }); },
+    }, icon("list"), `${open} farm to-do${open > 1 ? "s" : ""} waiting${here.length ? " while you're up there" : ""}`));
   }
 
   function tripRow(x, now) {
@@ -664,12 +738,16 @@ textarea { resize: vertical; min-height: 76px; }
   const dlg = $("#dlg");
   let F = null;
 
-  function knownNames() {
+  // Everyone the family has named on a visit or a to-do, most-used first.
+  function allNames() {
     const count = new Map();
-    for (const x of S.trips) for (const p of x.people) count.set(p, (count.get(p) || 0) + 1);
+    const bump = p => count.set(p, (count.get(p) || 0) + 1);
+    for (const x of S.trips) x.people.forEach(bump);
+    for (const t of S.todos) if (t.who) bump(t.who);
     const sorted = [...count.keys()].sort((a, b) => count.get(b) - count.get(a) || a.localeCompare(b));
-    return uniq([...F.people, ...sorted, ...(store.get("lastPeople") || []).filter(p => typeof p === "string")]);
+    return uniq([...sorted, ...(store.get("lastPeople") || []).filter(p => typeof p === "string")]);
   }
+  function knownNames() { return uniq([...F.people, ...allNames()]); }
 
   function openForm(trip, day) {
     if (!trip && !S.canWrite) return;
@@ -816,10 +894,168 @@ textarea { resize: vertical; min-height: 76px; }
     toast("Visit deleted");
   });
 
+  // ---- farm to-dos ----
+  function cleanTodo(id, d) {
+    if (!d || typeof d.text !== "string" || !d.text.trim()) return null;
+    return {
+      id, text: d.text.trim().slice(0, 200), done: !!d.done,
+      who: typeof d.who === "string" ? d.who.trim().slice(0, 40) : "",
+      due: DATE_RE.test(d.due) ? d.due : "",
+      createdAt: typeof d.createdAt === "number" ? d.createdAt : 0,
+      doneAt: typeof d.doneAt === "number" ? d.doneAt : null,
+    };
+  }
+  const openTodos = () => S.todos.filter(t => !t.done).sort((a, b) =>
+    (a.due || "9999") < (b.due || "9999") ? -1 : (a.due || "9999") > (b.due || "9999") ? 1 : a.createdAt - b.createdAt);
+  const doneTodos = () => S.todos.filter(t => t.done).sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
+
+  function todoError(err) {
+    toast(err && err.code === "permission-denied"
+      ? "To-dos need a quick database update from whoever set up Farm Time."
+      : writeError(err));
+  }
+  function saveTodo(t) {
+    if (!api || !S.family) return;
+    const { fs, db } = api;
+    const col = fs.collection(db, "families", S.family, "todos");
+    const now = Date.now();
+    const data = {
+      text: t.text.trim().slice(0, 200), done: !!t.done, who: t.who || "", due: t.due || "",
+      createdAt: t.createdAt || now, updatedAt: now, doneAt: t.done ? (t.doneAt || now) : null,
+    };
+    fs.setDoc(t.id ? fs.doc(col, t.id) : fs.doc(col), data).catch(todoError);
+  }
+
+  function dueTag(due) {
+    const n = diffDays(today(), due);
+    if (n < 0) return h("span", { class: "due late" }, "Overdue · " + fmt(due, SHORT));
+    if (n === 0) return h("span", { class: "due" }, "Needed today");
+    if (n === 1) return h("span", { class: "due" }, "Needed tomorrow");
+    return h("span", { class: "due" }, "Needed by " + fmt(due, SHORT));
+  }
+
+  function todoRow(t) {
+    return h("div", { class: "todo" + (t.done ? " is-done" : "") },
+      h("button", {
+        class: "check", type: "button", role: "checkbox", "aria-checked": String(t.done),
+        "aria-label": (t.done ? "Mark not done: " : "Mark done: ") + t.text,
+        onclick: () => saveTodo({ ...t, done: !t.done, doneAt: null }),
+      }, t.done && icon("check")),
+      h("button", { class: "todo-body", type: "button", onclick: () => openTodo(t) },
+        h("span", { class: "todo-text" }, t.text),
+        (t.who || (t.due && !t.done)) && h("span", { class: "meta" }, t.who && chip(t.who), !t.done && t.due && dueTag(t.due))));
+  }
+
+  let clearArmed = false;
+  function renderTodos() {
+    const list = $("#todoList");
+    clearArmed = false;
+    const open = openTodos(), done = doneTodos();
+    $("#todoAdd").hidden = !!S.todosError;
+    $("#todoSummary").textContent = S.todosError ? "" : open.length ? `${open.length} open` : done.length ? "All done" : "";
+    if (S.todosError) {
+      list.replaceChildren(h("p", { class: "sub" }, S.todosError === "permission-denied"
+        ? "To-dos aren't switched on yet. Whoever set up Farm Time needs to publish the updated database rules from the setup page."
+        : "Couldn't load the to-dos. Check your connection and reload the page."));
+      return;
+    }
+    list.replaceChildren(...open.map(todoRow));
+    if (!open.length && !done.length) {
+      list.append(h("p", { class: "sub" }, "Nothing on the list. Add jobs that need doing at the farm, like fixing the gate or picking up fence posts, so whoever's heading up can take care of them."));
+    } else if (!open.length) {
+      list.append(h("p", { class: "sub" }, "Everything's done. Nice work."));
+    }
+    if (done.length) {
+      const details = h("details", { class: "done-list" },
+        h("summary", {}, `Done (${done.length})`),
+        h("div", { class: "todo-list" }, done.slice(0, 50).map(todoRow)),
+        h("div", { class: "done-foot" }, h("button", {
+          class: "btn ghost", type: "button",
+          onclick: e => {
+            if (!clearArmed) { clearArmed = true; e.currentTarget.textContent = `Tap again to clear ${done.length}`; return; }
+            clearArmed = false;
+            const { fs, db } = api;
+            const batch = fs.writeBatch(db);
+            done.forEach(t => batch.delete(fs.doc(db, "families", S.family, "todos", t.id)));
+            batch.commit().catch(todoError);
+            toast("Cleared finished to-dos");
+          },
+        }, "Clear finished")));
+      details.open = S.doneOpen;
+      details.addEventListener("toggle", () => { S.doneOpen = details.open; });
+      list.append(details);
+    }
+  }
+
+  $("#todoAdd").addEventListener("submit", e => {
+    e.preventDefault();
+    const input = $("#todoNew");
+    const text = input.value.trim();
+    if (!text) return;
+    saveTodo({ id: null, text, done: false, who: "", due: "" });
+    input.value = "";
+    input.focus();
+  });
+
+  // to-do details dialog
+  const tdlg = $("#tdlg");
+  let TD = null;
+  function renderWho() {
+    const names = uniq([...(TD.who ? [TD.who] : []), ...allNames()]);
+    $("#t-who").replaceChildren(...names.map(n => h("button", {
+      class: "opt", type: "button", "aria-pressed": TD.who === n,
+      onclick: () => { TD.who = TD.who === n ? "" : n; renderWho(); },
+    }, n)));
+    if (!names.length) $("#t-who").append(h("p", { class: "hint" }, "Type a name below, or leave it for anyone."));
+  }
+  function openTodo(t) {
+    TD = { ...t, armed: false };
+    $("#t-text").value = t.text;
+    $("#t-due").value = t.due || "";
+    $("#t-newname").value = "";
+    $("#t-del").textContent = "Delete";
+    $("#t-del").classList.remove("armed");
+    $("#t-err").hidden = true;
+    renderWho();
+    tdlg.showModal();
+  }
+  function setWho() {
+    const v = $("#t-newname").value.trim().replace(/\s+/g, " ").slice(0, 40);
+    if (!v) return;
+    TD.who = allNames().find(n => n.toLowerCase() === v.toLowerCase()) || v;
+    $("#t-newname").value = "";
+    renderWho();
+  }
+  $("#t-addname").addEventListener("click", setWho);
+  $("#t-newname").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); setWho(); } });
+  $("#t-clear").addEventListener("click", () => { $("#t-due").value = ""; });
+  $("#t-cancel").addEventListener("click", () => tdlg.close());
+  $("#t-x").addEventListener("click", () => tdlg.close());
+  tdlg.addEventListener("click", e => { if (e.target === tdlg) tdlg.close(); });
+  $("#todoForm").addEventListener("submit", e => {
+    e.preventDefault();
+    setWho();
+    const text = $("#t-text").value.trim();
+    if (!text) { const er = $("#t-err"); er.textContent = "Describe what needs doing."; er.hidden = false; return; }
+    const due = $("#t-due").value;
+    saveTodo({ ...TD, text, due: DATE_RE.test(due) ? due : "" });
+    tdlg.close();
+    toast("To-do saved");
+  });
+  $("#t-del").addEventListener("click", () => {
+    const btn = $("#t-del");
+    if (!TD.armed) { TD.armed = true; btn.textContent = "Tap again to delete"; btn.classList.add("armed"); return; }
+    const { fs, db } = api;
+    fs.deleteDoc(fs.doc(db, "families", S.family, "todos", TD.id)).catch(todoError);
+    tdlg.close();
+    toast("To-do deleted");
+  });
+
   // ---- top-level controls ----
   $("#addBtn").addEventListener("click", () => openForm());
   $("#tabList").addEventListener("click", () => { S.view = "list"; store.set("view", "list"); render(); });
   $("#tabCal").addEventListener("click", () => { S.view = "cal"; store.set("view", "cal"); render(); });
+  $("#tabTodo").addEventListener("click", () => { S.view = "todo"; store.set("view", "todo"); render(); });
 
   let lastDay = today();
   setInterval(() => { if (today() !== lastDay) { lastDay = today(); render(); } }, 60000);
@@ -865,8 +1101,9 @@ textarea { resize: vertical; min-height: 76px; }
 
   $("#lockBtn").addEventListener("click", () => {
     unsub?.(); unsub = null;
+    unsubTodos?.(); unsubTodos = null;
     store.set("family", null);
-    S.family = null; S.trips = []; S.status = "locked";
+    S.family = null; S.trips = []; S.todos = []; S.status = "locked";
     render();
   });
 
@@ -874,6 +1111,7 @@ textarea { resize: vertical; min-height: 76px; }
   const FIREBASE = "https://www.gstatic.com/firebasejs/10.12.2/";
   let api = null;
   let unsub = null;
+  let unsubTodos = null;
 
   function openFamily(id) {
     S.family = id; S.status = "loading"; render();
@@ -891,6 +1129,17 @@ textarea { resize: vertical; min-height: 76px; }
       } else if (S.status !== "ready") {
         S.status = "error"; render();
       }
+    });
+    // To-dos live beside the trips. If the database rules predate to-dos, only this list
+    // is affected: the trips keep working and the To-dos tab explains what's needed.
+    unsubTodos?.();
+    unsubTodos = fs.onSnapshot(fs.collection(db, "families", id, "todos"), snap => {
+      S.todos = snap.docs.map(d => cleanTodo(d.id, d.data())).filter(Boolean);
+      S.todosError = null;
+      if (S.status === "ready") render();
+    }, err => {
+      S.todosError = (err && err.code) || "unavailable";
+      if (S.status === "ready") render();
     });
   }
 
