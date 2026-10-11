@@ -26,6 +26,20 @@ service cloud.firestore {
         && (!('notes' in d) || (d.notes is string && d.notes.size() <= 500));
     }
 
+    function validTodo(d) {
+      return d.keys().hasOnly(['text', 'done', 'who', 'due', 'createdAt', 'updatedAt', 'doneAt'])
+        && d.keys().hasAll(['text', 'done'])
+        && d.text is string && d.text.size() > 0 && d.text.size() <= 200
+        && d.done is bool
+        && (!('who' in d) || (d.who is string && d.who.size() <= 40))
+        && (!('due' in d) || d.due == '' || isDate(d.due));
+    }
+
+    match /families/{fam}/todos/{todo} {
+      allow read, delete: if fam == familyId();
+      allow create, update: if fam == familyId() && validTodo(request.resource.data);
+    }
+
     match /families/{fam}/trips/{trip} {
       allow read, delete: if fam == familyId();
       allow create, update: if fam == familyId() && validTrip(request.resource.data);
