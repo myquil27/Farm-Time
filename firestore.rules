@@ -1,14 +1,15 @@
 rules_version = '2';
 
 // Farm Time database rules.
-// Each family's trips live under families/<hash of the family code>/trips.
-// Nobody can list the families, so the only way into a family's trips is
-// to know its code. Paste this whole file into Firebase console → Firestore → Rules.
+// Don't paste this file as-is: open setup.html on the Farm Time site, choose the
+// family code there, and it gives you this file with your code's ID filled in.
+// Only the folder matching that one code can be read or written; everything else
+// in the database is locked.
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function familyExists(fam) {
-      return exists(/databases/$(database)/documents/families/$(fam));
+    function familyId() {
+      return 'FAMILY_ID_GOES_HERE';
     }
 
     function isDate(v) {
@@ -25,16 +26,9 @@ service cloud.firestore {
         && (!('notes' in d) || (d.notes is string && d.notes.size() <= 500));
     }
 
-    match /families/{fam} {
-      // Check a code (read one family by its id) or start a new family. No listing, no edits.
-      allow get: if true;
-      allow create: if fam.size() == 64
-        && request.resource.data.keys().hasOnly(['createdAt']);
-
-      match /trips/{trip} {
-        allow read, delete: if familyExists(fam);
-        allow create, update: if familyExists(fam) && validTrip(request.resource.data);
-      }
+    match /families/{fam}/trips/{trip} {
+      allow read, delete: if fam == familyId();
+      allow create, update: if fam == familyId() && validTrip(request.resource.data);
     }
   }
 }

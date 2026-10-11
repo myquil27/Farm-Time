@@ -133,7 +133,6 @@ svg.ic { width: 16px; height: 16px; flex: none; }
 .lock-form h2 { font-family: var(--f-display); font-size: 1.4rem; margin: 0; }
 .code-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .code-row input { flex: 1 1 200px; font-size: 1.05rem; letter-spacing: .02em; }
-.create { display: grid; gap: 10px; padding: 14px; border-radius: 14px; background: var(--accent-soft); justify-items: start; }
 .foot { display: flex; justify-content: center; padding-top: 8px; }
 .notice { background: var(--accent-soft); border-radius: 14px; padding: 12px 16px; font-size: .94rem; }
 
@@ -300,10 +299,6 @@ textarea { resize: vertical; min-height: 76px; }
         <button class="btn primary" type="submit" id="codeBtn">Open the log</button>
       </div>
       <p class="err" id="codeErr" hidden></p>
-      <div class="create" id="codeCreate" hidden>
-        <p class="sub">No family log uses that code yet. Setting up Farm Time for the first time? Start a new log with this code, then share the code with your family.</p>
-        <button class="btn" type="button" id="createBtn">Start a new family log</button>
-      </div>
     </form>
   </section>
   <section class="card today" id="today"></section>
@@ -808,54 +803,36 @@ textarea { resize: vertical; min-height: 76px; }
 
   // ---- family code ----
   // The code is never stored or sent as-is: its SHA-256 hash names the family's
-  // folder in the database, and the database rules refuse to list folders.
+  // folder in the database. The database rules (made on setup.html) allow only
+  // the one folder that matches the owner's code, so any other code is refused.
+  // setup.html hashes codes the same way; keep the two in step.
   async function familyId(code) {
     const norm = code.trim().toLowerCase().replace(/\s+/g, " ");
     const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("farm-time:" + norm));
     return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
   }
-  let pendingFamily = null;
   function showCodeErr(msg) { const e = $("#codeErr"); e.textContent = msg; e.hidden = !msg; }
 
   $("#lockForm").addEventListener("submit", async e => {
     e.preventDefault();
     if (!api) return;
     const code = $("#codeInput").value;
-    $("#codeCreate").hidden = true;
-    if (code.trim().length < 6) return showCodeErr("Family codes are at least 6 characters.");
+    if (!code.trim()) return showCodeErr("Type the family code first.");
     showCodeErr("");
     const btn = $("#codeBtn");
     btn.disabled = true;
     try {
       const id = await familyId(code);
       const { fs, db } = api;
-      const snap = await fs.getDoc(fs.doc(db, "families", id));
-      if (snap.exists()) { store.set("family", id); $("#codeInput").value = ""; openFamily(id); }
-      else { pendingFamily = { id, code }; $("#codeCreate").hidden = false; }
-    } catch {
-      showCodeErr("Couldn't check the code. Check your connection and try again.");
-    } finally {
-      btn.disabled = false;
-    }
-  });
-
-  $("#createBtn").addEventListener("click", async () => {
-    if (!api || !pendingFamily) return;
-    if (pendingFamily.code.trim().length < 8) {
-      return showCodeErr("For a new family log, pick a code of at least 8 characters that's hard to guess, like three words and a number.");
-    }
-    const btn = $("#createBtn");
-    btn.disabled = true;
-    try {
-      const { fs, db } = api;
-      await fs.setDoc(fs.doc(db, "families", pendingFamily.id), { createdAt: Date.now() });
-      store.set("family", pendingFamily.id);
+      // Ask the server directly (not the on-device copy) so a wrong code is never let in offline.
+      await fs.getDocsFromServer(fs.query(fs.collection(db, "families", id, "trips"), fs.limit(1)));
+      store.set("family", id);
       $("#codeInput").value = "";
-      $("#codeCreate").hidden = true;
-      openFamily(pendingFamily.id);
-      toast("Family log started. Share the code with your family.");
-    } catch {
-      showCodeErr("Couldn't start the log. Check your connection and try again.");
+      openFamily(id);
+    } catch (err) {
+      const code = err && err.code;
+      if (code === "permission-denied") showCodeErr("That's not the family code. Check with whoever set up Farm Time.");
+      else showCodeErr("Couldn't reach the family log. Check your internet connection and try again." + (code ? ` (${code})` : ""));
     } finally {
       btn.disabled = false;
     }
@@ -885,7 +862,7 @@ textarea { resize: vertical; min-height: 76px; }
       if (err && err.code === "permission-denied") {
         store.set("family", null);
         S.family = null; S.status = "locked"; render();
-        showCodeErr("That family code didn't work. Enter it again.");
+        showCodeErr("The family code has changed. Enter the new code.");
       } else if (S.status !== "ready") {
         S.status = "error"; render();
       }
