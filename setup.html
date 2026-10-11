@@ -248,6 +248,7 @@ textarea { resize: vertical; min-height: 76px; }
 .setup ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; }
 .setup code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .9em; background: var(--accent-soft); padding: 1px 6px; border-radius: 6px; }
 .rules { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .78rem; line-height: 1.5; min-height: 260px; white-space: pre; overflow: auto; }
+.setup a { color: var(--accent); font-weight: 600; }
 .ok { color: var(--accent); font-weight: 700; margin: 0; }
 </style>
 </head>
@@ -310,7 +311,10 @@ textarea { resize: vertical; min-height: 76px; }
     }
     if (!window.crypto || !crypto.subtle) return err("Open this page from its https:// address.");
     const id = await familyId(a);
-    $("#rules").value = template.replace("FAMILY_ID_GOES_HERE", id);
+    $("#rules").value = template
+      .replace(/^\/\/.*\n/gm, "")
+      .replace("service cloud.firestore", "// Farm Time database rules: only the family code chosen on setup.html can read or add visits.\nservice cloud.firestore")
+      .replace("FAMILY_ID_GOES_HERE", id);
     $("#out").hidden = false;
     $("#out").scrollIntoView({ behavior: "smooth", block: "start" });
   });
