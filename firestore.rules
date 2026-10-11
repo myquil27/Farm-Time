@@ -1,0 +1,40 @@
+rules_version = '2';
+
+// Farm Time database rules.
+// Each family's trips live under families/<hash of the family code>/trips.
+// Nobody can list the families, so the only way into a family's trips is
+// to know its code. Paste this whole file into Firebase console → Firestore → Rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function familyExists(fam) {
+      return exists(/databases/$(database)/documents/families/$(fam));
+    }
+
+    function isDate(v) {
+      return v is string && v.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    }
+
+    function validTrip(d) {
+      return d.keys().hasOnly(['people', 'start', 'end', 'reason', 'staying', 'notes', 'createdAt', 'updatedAt'])
+        && d.keys().hasAll(['people', 'start', 'end', 'reason'])
+        && d.people is list && d.people.size() > 0 && d.people.size() <= 20
+        && isDate(d.start) && isDate(d.end) && d.end >= d.start
+        && d.reason is string && d.reason.size() <= 20
+        && (!('staying' in d) || d.staying is bool)
+        && (!('notes' in d) || (d.notes is string && d.notes.size() <= 500));
+    }
+
+    match /families/{fam} {
+      // Check a code (read one family by its id) or start a new family. No listing, no edits.
+      allow get: if true;
+      allow create: if fam.size() == 64
+        && request.resource.data.keys().hasOnly(['createdAt']);
+
+      match /trips/{trip} {
+        allow read, delete: if familyExists(fam);
+        allow create, update: if familyExists(fam) && validTrip(request.resource.data);
+      }
+    }
+  }
+}
