@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gather the Party</title>
+<meta name="description" content="Mark the days you can play D&D and find the best night for the next session.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#2a2244">
+<meta name="apple-mobile-web-app-title" content="Gather the Party">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%232a2244'/%3E%3Cpath d='M12 3.2 19.6 7.6v8.8L12 20.8 4.4 16.4V7.6z' fill='none' stroke='%23e9b64c' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='M12 7.6 16.4 15H7.6z M12 3.2v4.4M19.6 7.6 16.4 15M4.4 7.6 7.6 15M7.6 15 12 20.8 16.4 15' fill='none' stroke='%23e9b64c' stroke-width='1.1' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700;800&family=Cinzel:wght@500;600;700&display=swap">
+<style>
+/* Layout: a moonlit castle scene across the top holds the next session (or the best day so far);
+   below it, parchment cards: best days ranked, your own availability, and the whole party's calendar */
+:root {
+  --bg: #f3ead9;
+  --surface: #fffaf0;
+  --ink: #2a1f17;
+  --muted: #76624d;
+  --line: #e2d3b7;
+  --accent: #8e2424;
+  --accent-ink: #fff6e6;
+  --accent-soft: #f2e0d0;
+  --gold: #b07d1e;
+  --gold-soft: #f5e6c2;
+  --yes: #2f7a4b;
+  --yes-soft: #d8ecdc;
+  --maybe: #a86e12;
+  --maybe-soft: #f6e5c0;
+  --no: #9c3a31;
+  --no-soft: #f2d9d3;
+  --none: #e8dcc5;
+  --hero-ink: #fff3dc;
+  --sky-top: #2a2244;
+  --sky-mid: #5a3b62;
+  --sky-low: #b56c5c;
+  --moon: #fbe9bf;
+  --mtn-far: #5b4566;
+  --mtn-mid: #3e2f4c;
+  --castle: #2a2036;
+  --window: #ffc95e;
+  --dragon: #241b30;
+  --star-o: .75;
+  --shadow-1: rgb(70 40 20 / .07);
+  --shadow-2: rgb(70 40 20 / .12);
+  --scrim: rgb(25 15 10 / .55);
+  --f-display: "Cinzel", "Trajan Pro", Georgia, serif;
+  --f-body: "Alegreya Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15121b; --surface: #211c28; --ink: #f1e7d6; --muted: #b3a48f; --line: #352d3d;
+    --accent: #e57a63; --accent-ink: #1b0f0c; --accent-soft: #3a2424; --gold: #e9b64c; --gold-soft: #3a2f18;
+    --yes: #73d08f; --yes-soft: #1d3326; --maybe: #e9b85a; --maybe-soft: #3a2f17; --no: #f08b7d; --no-soft: #3e211d; --none: #362e3d;
+    --sky-top: #0b0b1a; --sky-mid: #191732; --sky-low: #2c2340;
+    --moon: #f3e6c4; --mtn-far: #262038; --mtn-mid: #1a1528; --castle: #0f0c17; --window: #ffbf47; --dragon: #07060c; --star-o: 1;
+    --shadow-1: rgb(0 0 0 / .25); --shadow-2: rgb(0 0 0 / .4); --scrim: rgb(0 0 0 / .65);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15121b; --surface: #211c28; --ink: #f1e7d6; --muted: #b3a48f; --line: #352d3d;
+  --accent: #e57a63; --accent-ink: #1b0f0c; --accent-soft: #3a2424; --gold: #e9b64c; --gold-soft: #3a2f18;
+  --yes: #73d08f; --yes-soft: #1d3326; --maybe: #e9b85a; --maybe-soft: #3a2f17; --no: #f08b7d; --no-soft: #3e211d; --none: #362e3d;
+  --sky-top: #0b0b1a; --sky-mid: #191732; --sky-low: #2c2340;
+  --moon: #f3e6c4; --mtn-far: #262038; --mtn-mid: #1a1528; --castle: #0f0c17; --window: #ffbf47; --dragon: #07060c; --star-o: 1;
+  --shadow-1: rgb(0 0 0 / .25); --shadow-2: rgb(0 0 0 / .4); --scrim: rgb(0 0 0 / .65);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; padding-bottom: env(safe-area-inset-bottom, 0px); background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16.5px; line-height: 1.5; }
+:focus-visible { outline: 2.5px solid var(--gold); outline-offset: 2px; }
+h1, h2, h3 { text-wrap: balance; font-weight: 600; font-family: var(--f-display); letter-spacing: .01em; }
+svg.ic { width: 16px; height: 16px; flex: none; }
+
+/* ---------- Hero ---------- */
+.hero { position: relative; overflow: hidden; color: var(--hero-ink); background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 58%, var(--sky-low) 100%); padding-inline: 16px; padding-block: calc(18px + env(safe-area-inset-top, 0px)) 210px; }
+.scene { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 210px; display: block; }
+.scene .stars { fill: #fff6df; opacity: var(--star-o); }
+.scene .moon { fill: var(--moon); }
+.scene .far { fill: var(--mtn-far); }
+.scene .mid { fill: var(--mtn-mid); }
+.scene .castle { fill: var(--castle); }
+.scene .win { fill: var(--window); }
+.scene .dragon { fill: var(--dragon); }
+.scene .ground { fill: var(--bg); }
+.hero-in { position: relative; max-width: 900px; margin: 0 auto; display: grid; gap: 26px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 1.2rem; letter-spacing: .04em; }
+.brand .mark { width: 38px; height: 38px; border-radius: 11px; background: rgb(255 255 255 / .1); border: 1px solid rgb(255 236 200 / .25); display: grid; place-items: center; color: #e9b64c; }
+.greet { display: grid; gap: 8px; max-width: 680px; }
+.eyebrow { font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; color: #e9c27a; }
+.greet h1 { font-size: clamp(1.75rem, 5.2vw, 2.7rem); line-height: 1.15; margin: 0; text-shadow: 0 2px 18px rgb(0 0 0 / .35); }
+.greet .sub { margin: 0; color: var(--hero-ink); opacity: .86; font-size: 1.06rem; max-width: 60ch; }
+.sub { margin: 0; color: var(--muted); max-width: 64ch; }
+.sub strong { color: var(--ink); }
+
+/* ---------- Buttons ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-weight: 700; border-radius: 12px; padding: 9px 16px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; min-height: 44px; transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease; text-decoration: none; }
+.btn:hover { box-shadow: 0 3px 10px var(--shadow-2); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; box-shadow: 0 3px 10px var(--shadow-2); }
+.btn.gold { background: #e9b64c; color: #2a1a05; border-color: transparent; box-shadow: 0 3px 14px rgb(0 0 0 / .25); }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--muted); box-shadow: none; }
+.btn.ghost:hover { color: var(--ink); background: var(--accent-soft); }
+.btn.small { min-height: 36px; padding: 6px 12px; font-size: .92rem; }
+.btn.icon { width: 44px; padding: 0; }
+.btn.danger { background: transparent; color: var(--no); border-color: var(--no); }
+.btn.danger.armed { background: var(--no); color: var(--surface); }
+.btn:disabled { opacity: .55; cursor: default; }
+
+/* ---------- Page body ---------- */
+.wrap { max-width: 900px; margin: 0 auto; padding-inline: 16px; padding-block: 0 80px; display: grid; gap: 20px; position: relative; }
+.card { background: var(--surface); border-radius: 18px; border: 1px solid var(--line); box-shadow: 0 1px 2px var(--shadow-1), 0 10px 30px var(--shadow-2); }
+.lead { margin-top: -96px; padding: 20px; display: grid; gap: 14px; }
+.section-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.section-h h2 { font-size: 1.25rem; margin: 0; }
+.lock-form { display: grid; gap: 14px; max-width: 480px; }
+.lock-form h2 { font-size: 1.35rem; margin: 0; }
+.code-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.code-row input { flex: 1 1 200px; font-size: 1.05rem; }
+.notice { background: var(--gold-soft); border-radius: 12px; padding: 11px 14px; font-size: .95rem; }
+.foot { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding-top: 6px; }
+.err { color: var(--no); font-weight: 700; margin: 0; }
+.hint { font-size: .9rem; color: var(--muted); margin: 0; font-weight: 400; }
+
+/* Who-are-you picker */
+.me-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.seats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.seat { display: flex; align-items: center; gap: 10px; font: inherit; font-weight: 700; text-align: left; padding: 10px 12px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; min-height: 52px; }
+.seat:hover { border-color: var(--gold); }
+.seat[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+
+/* Player tokens: each seat has a fixed hue */
+.tok { --h: 30; width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; font-weight: 800; font-size: .74rem; letter-spacing: -.02em; color: #fff; background: hsl(var(--h) 48% 40%); box-shadow: inset 0 0 0 2px hsl(var(--h) 60% 70% / .55); }
+.pc { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 2px; border-radius: 999px; font-weight: 700; font-size: .9rem; background: var(--none); color: var(--ink); max-width: 100%; }
+.pc .tok { width: 24px; height: 24px; font-size: .64rem; }
+.pc .st { display: inline-flex; }
+.pc[data-s="y"] { background: var(--yes-soft); }
+.pc[data-s="y"] .st { color: var(--yes); }
+.pc[data-s="m"] { background: var(--maybe-soft); }
+.pc[data-s="m"] .st { color: var(--maybe); }
+.pc[data-s="n"] { background: var(--no-soft); color: var(--muted); }
+.pc[data-s="n"] .st { color: var(--no); }
+.pc[data-s="-"] { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line); color: var(--muted); }
+.pcs { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); width: fit-content; max-width: 100%; overflow-x: auto; }
+.tab { display: inline-flex; align-items: center; gap: 7px; font: inherit; font-weight: 700; border: 0; background: transparent; color: var(--muted); padding: 8px 14px; border-radius: 10px; cursor: pointer; min-height: 40px; white-space: nowrap; }
+.tab[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+/* Best days */
+.list { display: grid; gap: 12px; }
+.cand { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px; }
+.cand.top { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 10px 30px var(--shadow-2); }
+.datebox { display: grid; text-align: center; border-radius: 10px; overflow: hidden; font-variant-numeric: tabular-nums; background: var(--bg); border: 1px solid var(--line); }
+.datebox .dow { background: var(--accent); color: var(--accent-ink); font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 800; padding: 3px 0; }
+.datebox .dnum { font-family: var(--f-display); font-weight: 700; font-size: 1.45rem; line-height: 1.3; }
+.datebox .mon { font-size: .66rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 700; padding-bottom: 4px; }
+.cand .body { display: grid; gap: 6px; min-width: 0; }
+.cand h3 { margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.slot { display: inline-flex; align-items: center; gap: 5px; font-family: var(--f-body); font-weight: 700; font-size: .88rem; color: var(--muted); letter-spacing: 0; }
+.tally { font-weight: 700; font-size: .95rem; }
+.tally .y { color: var(--yes); }
+.tally .m { color: var(--maybe); }
+.side { display: grid; justify-items: center; gap: 8px; }
+.d20 { position: relative; width: 52px; height: 52px; display: grid; place-items: center; color: var(--gold); }
+.d20 svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.d20 b { position: relative; font-family: var(--f-display); font-size: 1rem; color: var(--ink); top: 3px; }
+.d20.nat svg { color: var(--gold); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--gold) 60%, transparent)); }
+.badge { display: inline-flex; align-items: center; gap: 5px; font-family: var(--f-body); font-size: .74rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 2px 9px; border-radius: 999px; background: var(--gold-soft); color: var(--gold); }
+.badge.set { background: var(--accent-soft); color: var(--accent); }
+.empty { padding: 24px 22px; display: grid; gap: 12px; justify-items: start; }
+.empty h2 { margin: 0; font-size: 1.25rem; }
+
+/* Upcoming sessions */
+.quest { padding: 18px; display: grid; gap: 12px; border-color: var(--accent); }
+.quest-top { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 14px; align-items: start; }
+.quest h3 { margin: 0; font-size: 1.15rem; }
+.quest .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--muted); font-size: .95rem; }
+.quest .meta span { display: inline-flex; align-items: center; gap: 6px; }
+.quest .notes { white-space: pre-line; overflow-wrap: anywhere; }
+.row-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Calendars */
+.cal { padding: 18px; display: grid; gap: 14px; }
+.cal-head { display: flex; align-items: center; gap: 6px; }
+.cal-head h2 { margin: 0 auto 0 0; font-size: 1.25rem; }
+.grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.wd { font: inherit; font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); text-align: center; font-weight: 800; padding: 4px 0; border: 0; background: transparent; border-radius: 8px; }
+button.wd { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+button.wd:hover { background: var(--accent-soft); color: var(--ink); }
+.day { min-width: 0; min-height: 78px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); padding: 4px; display: flex; flex-direction: column; gap: 3px; cursor: pointer; font: inherit; color: inherit; text-align: left; }
+.day:hover:not(:disabled) { border-color: var(--gold); }
+.day:disabled { cursor: default; opacity: .45; }
+.day.out { visibility: hidden; }
+.day .n { font-size: .8rem; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 22px; height: 22px; display: grid; place-items: center; border-radius: 999px; align-self: flex-start; }
+.day.today .n { background: var(--accent); color: var(--accent-ink); }
+.day.sel { border-color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.day.has-session .n { box-shadow: 0 0 0 2px var(--gold); }
+.half { flex: 1; min-height: 16px; border-radius: 5px; display: flex; align-items: center; justify-content: center; gap: 3px; font-size: .68rem; font-weight: 800; background: var(--none); color: var(--muted); }
+.half[data-s="y"] { background: var(--yes); color: var(--surface); }
+.half[data-s="m"] { background: var(--maybe); color: var(--surface); }
+.half[data-s="n"] { background: var(--no-soft); color: var(--no); }
+.half .ic { width: 12px; height: 12px; }
+.heat { flex: 1; min-height: 16px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 800; font-variant-numeric: tabular-nums; background: color-mix(in srgb, var(--yes) calc(var(--p, 0) * 100%), var(--none)); color: var(--ink); }
+.heat.hot { color: var(--surface); }
+.heat.full { box-shadow: inset 0 0 0 2px var(--gold); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .88rem; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 16px; height: 12px; border-radius: 4px; display: inline-block; background: var(--none); }
+
+/* Brush (mark my days) */
+.brushbar { display: grid; gap: 10px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.segb { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-weight: 700; font-size: .93rem; padding: 7px 12px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; min-height: 40px; }
+.segb:hover { border-color: var(--gold); }
+.segb[aria-pressed="true"] { border-color: var(--ink); background: var(--surface); box-shadow: 0 2px 8px var(--shadow-2); }
+.segb[data-b="y"] .ic { color: var(--yes); }
+.segb[data-b="m"] .ic { color: var(--maybe); }
+.segb[data-b="n"] .ic { color: var(--no); }
+.segb[data-b="-"] .ic { color: var(--muted); }
+.seg-l { font-size: .78rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); align-self: center; min-width: 74px; }
+
+/* Day details (party calendar) */
+.dayinfo { display: grid; gap: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+.dayinfo h3 { margin: 0; font-size: 1.1rem; }
+.slotrow { display: grid; gap: 8px; padding: 12px; border-radius: 12px; background: var(--bg); }
+.slotrow-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+
+@media (max-width: 560px) {
+  .cal { padding: 14px 10px; }
+  .grid { gap: 3px; }
+  .day { min-height: 64px; padding: 3px; border-radius: 8px; }
+  .half .ic, .half .t { display: none; }
+  .heat { font-size: .62rem; }
+  .cand { grid-template-columns: 50px minmax(0, 1fr); }
+  .cand .side { grid-column: 1 / -1; grid-template-columns: auto 1fr auto; justify-items: start; align-items: center; border-top: 1px solid var(--line); padding-top: 10px; }
+  .cand .side .btn { justify-self: end; }
+  .d20 { width: 40px; height: 40px; }
+  .d20 b { font-size: .85rem; }
+  .seg-l { min-width: 0; width: 100%; }
+  .tabs { width: 100%; }
+  .tab { flex: 1; justify-content: center; padding: 8px 6px; gap: 5px; font-size: .92rem; }
+  .tab .ic { display: none; }
+  .cal-head h2 { font-size: 1.02rem; }
+  .cal-head .mlabel { font-size: .92rem; min-width: 0 !important; }
+}
+
+/* ---------- Dialog ---------- */
+dialog { border: 1px solid var(--line); border-radius: 20px; padding: 0; background: var(--surface); color: var(--ink); width: min(540px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); box-shadow: 0 30px 80px var(--shadow-2); }
+dialog::backdrop { background: var(--scrim); }
+.form { display: grid; gap: 18px; padding: 22px; }
+.form-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.form h2 { margin: 0; font-size: 1.4rem; }
+fieldset { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 8px; }
+legend, .lab { font-weight: 800; padding: 0; margin-bottom: 8px; font-size: .97rem; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field .lab { margin: 0; }
+input[type="text"], input[type="date"], input[type="time"], textarea { font: inherit; padding: 10px 13px; border: 1.5px solid var(--line); border-radius: 11px; background: var(--bg); color: var(--ink); width: 100%; min-width: 0; }
+input:focus, textarea:focus { border-color: var(--gold); outline: none; }
+textarea { resize: vertical; min-height: 76px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.attend { display: grid; gap: 6px; background: var(--bg); border-radius: 12px; padding: 12px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+.actions .left { margin-right: auto; }
+
+.demo { background: #e9b64c; color: #2a1a05; text-align: center; font-weight: 700; padding: 6px 12px; font-size: .9rem; }
+.demo a { color: inherit; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 11px 20px; border-radius: 12px; font-weight: 700; box-shadow: 0 10px 30px var(--shadow-2); max-width: calc(100vw - 32px); z-index: 10; }
+@media (prefers-reduced-motion: no-preference) {
+  .toast { animation: rise .22s ease-out; }
+  @keyframes rise { from { transform: translate(-50%, 10px); opacity: 0; } }
+  .scene .dragon { animation: glide 14s ease-in-out infinite alternate; }
+  @keyframes glide { to { transform: translate(-60px, 10px); } }
+  .scene .win { animation: flicker 3.2s ease-in-out infinite alternate; }
+  @keyframes flicker { 50% { opacity: .78; } }
+}
+</style>
+</head>
+<body>
+<div class="demo" id="demoBar" hidden>Demo mode: made-up answers, saved only on this device. <a href="./">Leave demo</a></div>
+<header class="hero">
+  <svg class="scene" viewBox="0 0 1440 230" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <g class="stars">
+      <circle cx="80" cy="30" r="1.5"/><circle cx="190" cy="70" r="1.1"/><circle cx="330" cy="22" r="1.7"/><circle cx="470" cy="58" r="1.2"/>
+      <circle cx="610" cy="18" r="1.4"/><circle cx="760" cy="48" r="1.1"/><circle cx="900" cy="14" r="1.7"/><circle cx="1010" cy="60" r="1.2"/>
+      <circle cx="1250" cy="26" r="1.5"/><circle cx="1390" cy="64" r="1.2"/><circle cx="560" cy="92" r="1"/><circle cx="1340" cy="104" r="1"/>
+      <circle cx="250" cy="110" r="1"/><circle cx="830" cy="90" r="1"/>
+    </g>
+    <circle class="moon" cx="880" cy="52" r="28"/>
+    <!-- dragon gliding past the moon -->
+    <g transform="translate(-250 -30)"><path class="dragon" d="M1040 64c10-3 20-3 28 2l14-20c2 8 1 15-3 21l22-24c1 12-4 22-13 29 8 2 16 1 25-3-5 9-14 13-24 13l-10 3c-7 5-17 7-28 5l-14 6c-5 2-10 1-14-2 6 0 10-2 13-5-4-1-7-3-9-6 4 1 9 1 13-1-1-7 4-13 10-15z"/></g>
+    <path class="far" d="M0 140 L120 92 L190 120 L300 70 L400 118 L520 84 L640 128 L760 96 L860 124 L980 78 L1090 122 L1200 90 L1320 126 L1440 98 V230 H0 Z"/>
+    <path class="mid" d="M0 172 C 160 140, 300 150, 420 160 S 640 120, 760 132 S 1040 150, 1200 144 S 1380 138, 1440 150 V230 H0 Z"/>
+    <!-- castle on the ridge -->
+    <g class="castle">
+      <rect x="596" y="96" width="22" height="44"/><polygon points="592,96 607,70 622,96"/>
+      <rect x="690" y="88" width="24" height="52"/><polygon points="686,88 702,60 718,88"/>
+      <rect x="618" y="108" width="72" height="34"/>
+      <path d="M618 108v-7h8v7h6v-7h8v7h6v-7h8v7h6v-7h8v7h6v-7h8v7z"/>
+      <rect x="640" y="84" width="26" height="30"/><path d="M640 84v-6h6v6h4v-6h6v6h4v-6h6v6z"/>
+      <rect x="560" y="124" width="190" height="20"/>
+    </g>
+    <g class="win">
+      <rect x="604" y="106" width="5" height="8" rx="2.5"/><rect x="699" y="98" width="6" height="9" rx="3"/><rect x="699" y="116" width="6" height="9" rx="3"/>
+      <rect x="650" y="92" width="6" height="9" rx="3"/><path d="M646 142v-12a8 8 0 0 1 16 0v12z" opacity=".9"/>
+    </g>
+    <path class="ground" d="M0 196 C 300 176, 620 188, 920 184 S 1300 174, 1440 186 V230 H0 Z"/>
+  </svg>
+  <div class="hero-in">
+    <div class="topbar">
+      <p class="brand">
+        <span class="mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5 20.2 7.25v9.5L12 21.5 3.8 16.75v-9.5z" stroke-width="1.6"/><path d="M12 7.4 16.6 15.2H7.4zM12 2.5v4.9M20.2 7.25 16.6 15.2M3.8 7.25 7.4 15.2M7.4 15.2 12 21.5l4.6-6.3M3.8 16.75l3.6-1.55M20.2 16.75l-3.6-1.55" stroke-width="1.1"/></svg></span>
+        Gather the Party
+      </p>
+      <button class="btn gold" id="markBtn" type="button" hidden>
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        Mark my days
+      </button>
+    </div>
+    <div class="greet" id="greet" aria-live="polite"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card lead" id="lock" hidden>
+    <form class="lock-form" id="lockForm" novalidate>
+      <h2>Speak the party code</h2>
+      <p class="sub">Ask your Dungeon Master for the code. You only need to enter it once on each phone or computer.</p>
+      <div class="code-row">
+        <input type="text" id="codeInput" placeholder="Party code" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="Party code">
+        <button class="btn primary" type="submit" id="codeBtn">Enter the tavern</button>
+      </div>
+      <p class="err" id="codeErr" hidden></p>
+    </form>
+  </section>
+
+  <section class="card lead" id="setupCard" hidden>
+    <h2 style="margin:0">Almost ready</h2>
+    <p class="sub">This page isn't connected to its database yet. Whoever runs it needs to paste the Firebase settings into <code>dnd/config.js</code> (see the README). Until then you can look around with made-up answers.</p>
+    <div><a class="btn primary" href="?demo">Try the demo</a></div>
+  </section>
+
+  <section class="card lead" id="who" hidden></section>
+
+  <div class="tabs" id="tabs" role="group" aria-label="View" hidden>
+    <button class="tab" type="button" data-view="best">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>
+      Best days</button>
+    <button class="tab" type="button" data-view="mine">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      My days</button>
+    <button class="tab" type="button" data-view="party">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      Party calendar</button>
+  </div>
+
+  <section id="bestView" class="list" hidden></section>
+  <section id="mineView" class="card cal" hidden></section>
+  <section id="partyView" class="card cal" hidden></section>
+
+  <footer class="foot" id="foot" hidden>
+    <button class="btn ghost" type="button" id="lockBtn">Use a different party code</button>
+  </footer>
+</main>
+
+<dialog id="dlg" aria-labelledby="s-title">
+  <form class="form" id="sessForm" novalidate>
+    <div class="form-h">
+      <h2 id="s-title">Set the session</h2>
+      <button class="btn ghost icon" type="button" id="s-x" aria-label="Close">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="two">
+      <label class="field"><span class="lab">Day</span><input type="date" id="s-date" required></label>
+      <label class="field"><span class="lab">Start time</span><input type="time" id="s-time" step="900"></label>
+    </div>
+    <fieldset>
+      <legend>Part of the day</legend>
+      <div class="seg" id="s-slot"></div>
+    </fieldset>
+    <div class="attend" id="s-attend"></div>
+    <label class="field"><span class="lab">Where <span class="hint">(optional)</span></span>
+      <input type="text" id="s-where" maxlength="80" placeholder="Chris's place, Discord, the game store…" autocomplete="off"></label>
+    <label class="field"><span class="lab">Notes <span class="hint">(optional)</span></span>
+      <textarea id="s-notes" maxlength="500" placeholder="Bring snacks, level up to 5, we pick up at the goblin cave…"></textarea></label>
+    <p class="err" id="s-err" hidden></p>
+    <div class="actions">
+      <button class="btn danger left" type="button" id="s-del" hidden>Cancel session</button>
+      <button class="btn ghost" type="button" id="s-cancel">Close</button>
+      <button class="btn primary" type="submit">Save session</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="config.js"></script>
+<script>
+(() => {
+  // ---- the party ----
+  // To add or rename someone: change this list AND the list in firestore.rules, then re-run setup.html.
+  const PARTY = [
+    { id: "john", name: "John", ini: "J", h: 4 },
+    { id: "michael", name: "Michael", ini: "M", h: 212 },
+    { id: "matt-erin", name: "Matt & Erin", ini: "ME", h: 146 },
+    { id: "chris", name: "Chris", ini: "C", h: 278 },
+    { id: "ryan-lynda", name: "Ryan & Lynda", ini: "RL", h: 32 },
+  ];
+  const seatById = id => PARTY.find(p => p.id === id);
+  const SLOTS = [
+    { id: "a", i: 0, label: "Afternoon", hint: "about 1–5 pm", time: "13:00", icon: "sun" },
+    { id: "e", i: 1, label: "Evening", hint: "about 6–10 pm", time: "18:00", icon: "moon" },
+  ];
+  const slotById = id => SLOTS.find(s => s.id === id) || SLOTS[1];
+  const STATES = {
+    y: { label: "Can play", short: "In", icon: "check" },
+    m: { label: "Maybe", short: "Maybe", icon: "q" },
+    n: { label: "Can't", short: "Out", icon: "x" },
+    "-": { label: "No answer yet", short: "—", icon: "dash" },
+  };
+  const HORIZON = 120; // days ahead that count for "best days"
+
+  const ICONS = {
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    q: '<path d="M9.2 9a3 3 0 1 1 4.3 2.7c-.9.5-1.5 1.2-1.5 2.3"/><circle cx="12" cy="18" r=".6" fill="currentColor"/>',
+    x: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+    dash: '<path d="M7 12h10"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/>',
+    moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+    left: '<path d="M15 5l-7 7 7 7"/>',
+    right: '<path d="M9 5l7 7-7 7"/>',
+    pin: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.2"/>',
+    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+    cal: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+    sword: '<path d="M14.5 4H20v5.5L10 19.5 4.5 14z"/><path d="M7 16.5 4 19.5M3 15l6 6"/>',
+    erase: '<path d="M4 17.5 13.5 8l5 5-6.5 6.5H6z"/><path d="M9 19.5h11"/>',
+  };
+  function icon(name, cls = "ic") {
+    const s = document.createElement("span");
+    s.style.display = "inline-flex";
+    s.setAttribute("aria-hidden", "true");
+    s.innerHTML = `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`;
+    return s;
+  }
+  const D20_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linejoin="round" aria-hidden="true"><path d="M12 1.8 20.8 6.9v10.2L12 22.2 3.2 17.1V6.9z" stroke-width="1.4" fill="color-mix(in srgb, currentColor 14%, transparent)"/><path d="M12 6.4 17 15H7zM12 1.8v4.6M20.8 6.9 17 15M3.2 6.9 7 15M7 15l5 7.2 5-7.2M3.2 17.1 7 15M20.8 17.1 17 15" stroke-width=".8" opacity=".7"/></svg>';
+
+  const store = {
+    get(k) { try { return JSON.parse(localStorage.getItem("gtp." + k)); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem("gtp." + k, JSON.stringify(v)); } catch {} },
+  };
+
+  // ---- dates (local calendar days as YYYY-MM-DD strings) ----
+  const pad = n => String(n).padStart(2, "0");
+  const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const today = () => ymd(new Date());
+  const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return ymd(d); };
+  const diffDays = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+  const fmt = (s, o) => parse(s).toLocaleDateString(undefined, o);
+  const SHORT = { weekday: "short", month: "short", day: "numeric" };
+  const LONG = { weekday: "long", month: "long", day: "numeric" };
+  const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+  const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+  const monthStart = s => s.slice(0, 8) + "01";
+  const addMonths = (s, n) => { const d = parse(monthStart(s)); d.setMonth(d.getMonth() + n); return ymd(d); };
+  function fmtTime(t) {
+    if (!TIME_RE.test(t)) return "";
+    const [hh, mm] = t.split(":").map(Number);
+    return new Date(2000, 0, 1, hh, mm).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  }
+  function relDay(s) {
+    const n = diffDays(today(), s);
+    if (n === 0) return "today";
+    if (n === 1) return "tomorrow";
+    if (n < 7) return `this ${fmt(s, { weekday: "long" })}`;
+    return `in ${n} days`;
+  }
+  function joinNames(names) {
+    if (names.length <= 1) return names[0] || "";
+    return names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
+  }
+
+  // ---- helpers ----
+  const $ = s => document.querySelector(s);
+  function h(tag, props, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(props || {})) {
+      if (v == null || v === false) continue;
+      if (k === "class") el.className = v;
+      else if (k === "style") el.style.cssText = v;
+      else if (k === "html") el.innerHTML = v;
+      else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? "" : v);
+    }
+    for (const c of kids.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : String(c));
+    return el;
+  }
+  const tok = p => h("span", { class: "tok", style: `--h:${p.h}`, "aria-hidden": "true" }, p.ini);
+  const stateChip = (p, s) => h("span", { class: "pc", "data-s": s, title: `${p.name}: ${STATES[s].label}` },
+    tok(p), p.name, h("span", { class: "st" }, icon(STATES[s].icon)), h("span", { class: "visually-hidden", style: "position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)" }, STATES[s].label));
+  function datebox(s) {
+    return h("div", { class: "datebox", "aria-hidden": "true" },
+      h("span", { class: "dow" }, fmt(s, { weekday: "short" })),
+      h("span", { class: "dnum" }, String(parse(s).getDate())),
+      h("span", { class: "mon" }, fmt(s, { month: "short" })));
+  }
+  let toastTimer;
+  function toast(msg) {
+    document.querySelector(".toast")?.remove();
+    const el = h("div", { class: "toast", role: "status" }, msg);
+    document.body.append(el);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.remove(), 2600);
+  }
+
+  // ---- state ----
+  const VIEWS = ["best", "mine", "party"];
+  const S = {
+    status: "loading", party: null,
+    avail: {},        // seatId -> { "YYYY-MM-DD": "ym" }  (afternoon, evening)
+    sessions: [],
+    me: seatById(store.get("me")) ? store.get("me") : null,
+    pickingMe: false,
+    view: VIEWS.includes(store.get("view")) ? store.get("view") : "best",
+    mineMonth: monthStart(today()), partyMonth: monthStart(today()),
+    brush: "y", brushSlot: store.get("brushSlot") || "b",
+    selDay: null,
+  };
+
+  const getState = (seat, date, slot) => {
+    const v = S.avail[seat]?.[date];
+    return v ? v[slotById(slot).i] : "-";
+  };
+
+  function cleanDays(days) {
+    const out = {};
+    if (days && typeof days === "object") for (const [k, v] of Object.entries(days)) {
+      if (DATE_RE.test(k) && typeof v === "string" && /^[ymn-]{2}$/.test(v) && v !== "--") out[k] = v;
+    }
+    return out;
+  }
+  function cleanSession(id, d) {
+    if (!d || !DATE_RE.test(d.date) || !["a", "e"].includes(d.slot)) return null;
+    return {
+      id, date: d.date, slot: d.slot,
+      time: TIME_RE.test(d.time) ? d.time : slotById(d.slot).time,
+      where: typeof d.where === "string" ? d.where.slice(0, 80) : "",
+      notes: typeof d.notes === "string" ? d.notes.slice(0, 500) : "",
+      createdAt: typeof d.createdAt === "number" ? d.createdAt : null,
+    };
+  }
+  const upcoming = () => S.sessions.filter(s => s.date >= today()).sort((a, b) => (a.date + a.time) < (b.date + b.time) ? -1 : 1);
+  const sessionOn = (date, slot) => S.sessions.find(s => s.date === date && (!slot || s.slot === slot));
+
+  // ---- scoring ----
+  function tallyFor(date, slot) {
+    const t = { y: [], m: [], n: [], "-": [] };
+    for (const p of PARTY) t[getState(p.id, date, slot)].push(p);
+    return t;
+  }
+  // A d20 "roll" for how good a slot is: 20 means the whole party can play.
+  const roll = t => Math.max(1, Math.round(((t.y.length + t.m.length * 0.5) / PARTY.length) * 20));
+  function bestSlots(limit = 6) {
+    const out = [];
+    const start = today();
+    for (let i = 0; i <= HORIZON; i++) {
+      const date = addDays(start, i);
+      for (const sl of SLOTS) {
+        const t = tallyFor(date, sl.id);
+        if (!t.y.length) continue;
+        out.push({ date, slot: sl.id, t });
+      }
+    }
+    out.sort((a, b) =>
+      b.t.y.length - a.t.y.length || b.t.m.length - a.t.m.length || a.t.n.length - b.t.n.length ||
+      (a.date < b.date ? -1 : a.date > b.date ? 1 : 0) || (a.slot === "e" ? -1 : 1));
+    return out.slice(0, limit);
+  }
+  const silent = () => PARTY.filter(p => !Object.keys(S.avail[p.id] || {}).some(d => d >= today()));
+
+  // ---- render ----
+  function render() {
+    const ready = S.status === "ready";
+    $("#lock").hidden = S.status !== "locked";
+    $("#setupCard").hidden = S.status !== "setup";
+    $("#tabs").hidden = !ready;
+    $("#foot").hidden = !ready;
+    $("#markBtn").hidden = !ready || (S.view === "mine" && S.me && !S.pickingMe);
+    for (const b of document.querySelectorAll(".tab")) b.setAttribute("aria-pressed", String(b.dataset.view === S.view));
+    $("#bestView").hidden = !ready || S.view !== "best";
+    $("#mineView").hidden = !ready || S.view !== "mine";
+    $("#partyView").hidden = !ready || S.view !== "party";
+    renderGreet();
+    renderWho();
+    if (!ready) return;
+    if (S.view === "best") renderBest();
+    else if (S.view === "mine") renderMine();
+    else renderParty();
+  }
+
+  function renderGreet() {
+    const el = $("#greet");
+    el.replaceChildren();
+    if (S.status === "loading") { el.append(h("div", { class: "eyebrow" }, "Rolling initiative…"), h("h1", {}, "Gathering the party…")); return; }
+    if (S.status !== "ready") {
+      el.append(h("div", { class: "eyebrow" }, "D&D session planner"), h("h1", {}, "When does the party ride next?"));
+      el.append(h("p", { class: "sub" }, S.status === "error"
+        ? "Couldn't reach the party's records. Check your connection and reload the page."
+        : "Everyone marks the days they can play. The page finds the night the most adventurers can make it."));
+      return;
+    }
+    const next = upcoming()[0];
+    if (next) {
+      const sl = slotById(next.slot);
+      el.append(h("div", { class: "eyebrow" }, `Next session · ${relDay(next.date)}`),
+        h("h1", {}, `${fmt(next.date, LONG)} at ${fmtTime(next.time)}`));
+      const t = tallyFor(next.date, next.slot);
+      const bits = [];
+      if (next.where) bits.push(next.where);
+      bits.push(t.y.length === PARTY.length ? "The whole party can make it." : `${t.y.length} of ${PARTY.length} can make it${t.m.length ? `, ${t.m.length} maybe` : ""}.`);
+      el.append(h("p", { class: "sub" }, bits.join(" · ")));
+      return;
+    }
+    const best = bestSlots(1)[0];
+    el.append(h("div", { class: "eyebrow" }, "No session set yet"), h("h1", {}, "When does the party ride next?"));
+    el.append(h("p", { class: "sub" }, best
+      ? `Best so far: ${fmt(best.date, LONG)} ${slotById(best.slot).label.toLowerCase()}, with ${best.t.y.length} of ${PARTY.length} in.`
+      : "Mark the days you can play, and the best ones will show up here."));
+  }
+
+  function renderWho() {
+    const el = $("#who");
+    const show = S.status === "ready" && (!S.me || S.pickingMe);
+    el.hidden = !show;
+    if (!show) return;
+    el.replaceChildren(
+      h("div", { class: "section-h" }, h("h2", {}, "Who are you, adventurer?")),
+      h("p", { class: "sub" }, "Pick your name so the days you mark are saved under you. This is remembered on this device."),
+      h("div", { class: "seats" }, PARTY.map(p => h("button", {
+        class: "seat", type: "button", "aria-pressed": String(S.me === p.id),
+        onclick: () => { S.me = p.id; S.pickingMe = false; store.set("me", p.id); S.view = "mine"; store.set("view", "mine"); render(); },
+      }, tok(p), p.name))),
+      ...(S.me ? [h("div", {}, h("button", { class: "btn ghost small", type: "button", onclick: () => { S.pickingMe = false; render(); } }, "Never mind"))] : []),
+    );
+  }
+
+  // Best days view
+  function renderBest() {
+    const el = $("#bestView");
+    el.replaceChildren();
+    for (const s of upcoming().slice(0, 3)) el.append(questCard(s));
+
+    const cands = bestSlots(6);
+    const quiet = silent();
+    el.append(h("div", { class: "section-h", style: "margin-top:4px" },
+      h("h2", {}, "Best days to play"),
+      h("span", { class: "hint" }, `Next ${Math.round(HORIZON / 30)} months, most adventurers first`)));
+    if (quiet.length && quiet.length < PARTY.length) {
+      el.append(h("div", { class: "notice" }, h("strong", {}, "Still waiting on "), joinNames(quiet.map(p => p.name)),
+        quiet.length === 1 ? ". Their answers could change the best day." : ". Their answers could change the best days."));
+    }
+    if (!cands.length) {
+      el.append(h("section", { class: "card empty" },
+        h("h2", {}, "The quest board is empty"),
+        h("p", { class: "sub" }, "Nobody has marked a day they can play yet. Mark yours and the best days will rank themselves here."),
+        h("button", { class: "btn primary", type: "button", onclick: goMine }, icon("check"), "Mark my days")));
+      return;
+    }
+    cands.forEach((c, i) => el.append(candCard(c, i === 0)));
+  }
+
+  function candCard(c, top) {
+    const sl = slotById(c.slot);
+    const r = roll(c.t);
+    const nat = c.t.y.length === PARTY.length;
+    const set = sessionOn(c.date, c.slot);
+    const tally = h("div", { class: "tally" },
+      h("span", { class: "y" }, `${c.t.y.length} of ${PARTY.length} can play`),
+      c.t.m.length ? h("span", { class: "m" }, ` · ${c.t.m.length} maybe`) : null,
+      c.t["-"].length ? h("span", { style: "color:var(--muted);font-weight:500" }, ` · ${c.t["-"].length} no answer`) : null);
+    return h("article", { class: "card cand" + (top ? " top" : "") },
+      datebox(c.date),
+      h("div", { class: "body" },
+        h("h3", {}, fmt(c.date, { weekday: "long", month: "short", day: "numeric" }),
+          h("span", { class: "slot" }, icon(sl.icon), sl.label),
+          nat ? h("span", { class: "badge" }, "Natural 20") : top ? h("span", { class: "badge" }, "Top pick") : null,
+          set ? h("span", { class: "badge set" }, "Session set") : null),
+        tally,
+        h("div", { class: "pcs" }, PARTY.map(p => stateChip(p, getState(p.id, c.date, c.slot))))),
+      h("div", { class: "side" },
+        h("div", { class: "d20" + (nat ? " nat" : ""), title: `Party roll: ${r} out of 20`, html: D20_SVG }, h("b", {}, String(r))),
+        set ? h("button", { class: "btn small", type: "button", onclick: () => openSession(set) }, "Edit")
+            : h("button", { class: "btn primary small", type: "button", onclick: () => openSession(null, c.date, c.slot) }, icon("sword"), "Schedule")));
+  }
+
+  function questCard(s) {
+    const sl = slotById(s.slot);
+    const t = tallyFor(s.date, s.slot);
+    return h("article", { class: "card quest" },
+      h("div", { class: "quest-top" }, datebox(s.date),
+        h("div", { style: "display:grid;gap:6px;min-width:0" },
+          h("div", { class: "eyebrow", style: "color:var(--accent)" }, `Session ${relDay(s.date)}`),
+          h("h3", {}, fmt(s.date, LONG)),
+          h("div", { class: "meta" },
+            h("span", {}, icon("clock"), `${fmtTime(s.time)} · ${sl.label.toLowerCase()}`),
+            s.where ? h("span", {}, icon("pin"), s.where) : null),
+          s.notes ? h("div", { class: "notes" }, s.notes) : null)),
+      h("div", { class: "pcs" }, PARTY.map(p => stateChip(p, getState(p.id, s.date, s.slot)))),
+      t["-"].length ? h("p", { class: "hint" }, `${joinNames(t["-"].map(p => p.name))} ${t["-"].length > 1 ? "haven't" : "hasn't"} answered for this day yet.`) : null,
+      h("div", { class: "row-actions" },
+        h("button", { class: "btn small", type: "button", onclick: () => downloadIcs(s) }, icon("cal"), "Add to my calendar"),
+        h("button", { class: "btn ghost small", type: "button", onclick: () => openSession(s) }, "Edit")));
+  }
+
+  // Shared month grid
+  function monthGrid(month, cell, onWeekday) {
+    const first = parse(month);
+    const grid = h("div", { class: "grid" });
+    ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((w, i) => grid.append(onWeekday
+      ? h("button", { class: "wd", type: "button", title: `Mark every ${w} left this month`, onclick: () => onWeekday(i) }, w)
+      : h("div", { class: "wd" }, w)));
+    const lead = first.getDay();
+    const daysIn = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+    for (let i = 0; i < lead; i++) grid.append(h("div", { class: "day out", "aria-hidden": "true" }));
+    for (let d = 1; d <= daysIn; d++) grid.append(cell(ymd(new Date(first.getFullYear(), first.getMonth(), d))));
+    return grid;
+  }
+  function calHead(title, month, key) {
+    const min = monthStart(today());
+    return h("div", { class: "cal-head" },
+      h("h2", {}, title),
+      h("button", { class: "btn ghost icon", type: "button", "aria-label": "Previous month", disabled: month <= min,
+        onclick: () => { S[key] = addMonths(month, -1); render(); } }, icon("left")),
+      h("span", { class: "mlabel", style: "font-weight:800;min-width:9ch;text-align:center;white-space:nowrap" }, fmt(month, { month: "long", year: "numeric" })),
+      h("button", { class: "btn ghost icon", type: "button", "aria-label": "Next month", disabled: month >= addMonths(min, 6),
+        onclick: () => { S[key] = addMonths(month, 1); render(); } }, icon("right")));
+  }
+
+  // My days view: paint days with a brush
+  function renderMine() {
+    const el = $("#mineView");
+    if (!S.me) { S.pickingMe = true; renderWho(); el.replaceChildren(); el.hidden = true; return; }
+    const me = seatById(S.me);
+    const brushes = [["y", "Can play", "check"], ["m", "Maybe", "q"], ["n", "Can't", "x"], ["-", "Erase", "erase"]];
+    const slotOpts = [["b", "Both", null], ["a", "Afternoon", "sun"], ["e", "Evening", "moon"]];
+    const t = today();
+    el.replaceChildren(
+      h("div", { class: "me-row" }, tok(me),
+        h("strong", { style: "font-size:1.05rem" }, `Marking days for ${me.name}`),
+        h("button", { class: "btn ghost small", type: "button", onclick: () => { S.pickingMe = true; render(); window.scrollTo({ top: 0, behavior: "smooth" }); } }, "Not you?")),
+      h("div", { class: "brushbar" },
+        h("div", { class: "seg", role: "group", "aria-label": "Answer" }, h("span", { class: "seg-l" }, "Answer"),
+          brushes.map(([id, label, ic]) => h("button", { class: "segb", type: "button", "data-b": id, "aria-pressed": String(S.brush === id),
+            onclick: () => { S.brush = id; renderMine(); } }, icon(ic), label))),
+        h("div", { class: "seg", role: "group", "aria-label": "Part of the day" }, h("span", { class: "seg-l" }, "When"),
+          slotOpts.map(([id, label, ic]) => h("button", { class: "segb", type: "button", "aria-pressed": String(S.brushSlot === id),
+            onclick: () => { S.brushSlot = id; store.set("brushSlot", id); renderMine(); } }, ic ? icon(ic) : null, label))),
+        h("p", { class: "hint" }, "Tap a day to mark it; tap it again to clear. Tap a weekday name (like Sat) to mark every one left in the month. Afternoon is about 1–5 pm, evening about 6–10 pm.")),
+      calHead("Your days", S.mineMonth, "mineMonth"),
+      monthGrid(S.mineMonth, date => {
+        const past = date < t;
+        const v = S.avail[S.me]?.[date] || "--";
+        const ses = sessionOn(date);
+        return h("button", {
+          class: "day" + (date === t ? " today" : "") + (ses ? " has-session" : ""), type: "button", disabled: past,
+          "aria-label": `${fmt(date, LONG)}: afternoon ${STATES[v[0]].label}, evening ${STATES[v[1]].label}`,
+          onclick: () => paint([date], true),
+        }, h("span", { class: "n" }, String(parse(date).getDate())),
+          SLOTS.map(sl => h("span", { class: "half", "data-s": v[sl.i], title: sl.label },
+            v[sl.i] !== "-" ? icon(STATES[v[sl.i]].icon) : null, h("span", { class: "t" }, sl.id === "a" ? "Aft" : "Eve"))));
+      }, wd => {
+        const first = parse(S.mineMonth);
+        const dates = [];
+        for (let d = new Date(first); d.getMonth() === first.getMonth(); d.setDate(d.getDate() + 1)) {
+          if (d.getDay() === wd && ymd(d) >= t) dates.push(ymd(d));
+        }
+        if (dates.length) paint(dates, false);
+      }),
+      legend(),
+    );
+  }
+  function legend() {
+    return h("div", { class: "legend" },
+      h("span", {}, h("i", { style: "background:var(--yes)" }), "Can play"),
+      h("span", {}, h("i", { style: "background:var(--maybe)" }), "Maybe"),
+      h("span", {}, h("i", { style: "background:var(--no-soft);box-shadow:inset 0 0 0 1.5px var(--no)" }), "Can't"),
+      h("span", {}, h("i", {}), "Not marked"),
+      h("span", {}, "Top half afternoon, bottom half evening"));
+  }
+
+  // Apply the brush to dates. A single tap on a day already painted this way clears it.
+  function paint(dates, toggle) {
+    if (!S.me || !backend) return;
+    const targets = S.brushSlot === "b" ? [0, 1] : [slotById(S.brushSlot).i];
+    const mine = S.avail[S.me] || {};
+    const patch = {};
+    for (const date of dates) {
+      const cur = (mine[date] || "--").split("");
+      let val = S.brush;
+      if (toggle && val !== "-" && targets.every(i => cur[i] === val)) val = "-";
+      for (const i of targets) cur[i] = val;
+      const next = cur.join("");
+      patch[date] = next === "--" ? null : next;
+    }
+    // Show the change at once; the database listener confirms it.
+    const local = { ...mine };
+    for (const [d, v] of Object.entries(patch)) if (v) local[d] = v; else delete local[d];
+    S.avail = { ...S.avail, [S.me]: local };
+    render();
+    backend.setDays(S.party, S.me, patch).catch(err => toast(writeError(err)));
+    if (!toggle) toast(`Marked ${dates.length} day${dates.length > 1 ? "s" : ""}`);
+  }
+
+  // Party calendar view
+  function renderParty() {
+    const el = $("#partyView");
+    const t = today();
+    el.replaceChildren(
+      calHead("The whole party", S.partyMonth, "partyMonth"),
+      monthGrid(S.partyMonth, date => {
+        const past = date < t;
+        const ses = sessionOn(date);
+        return h("button", {
+          class: "day" + (date === t ? " today" : "") + (S.selDay === date ? " sel" : "") + (ses ? " has-session" : ""),
+          type: "button", disabled: past, "aria-label": fmt(date, LONG),
+          onclick: () => { S.selDay = S.selDay === date ? null : date; renderParty(); },
+        }, h("span", { class: "n" }, String(parse(date).getDate())),
+          SLOTS.map(sl => {
+            const tt = tallyFor(date, sl.id);
+            const p = (tt.y.length + tt.m.length * 0.4) / PARTY.length;
+            const full = tt.y.length === PARTY.length;
+            return h("span", { class: "heat" + (p >= 0.55 ? " hot" : "") + (full ? " full" : ""), style: `--p:${p.toFixed(2)}`, title: `${sl.label}: ${tt.y.length} can play` },
+              tt.y.length || tt.m.length ? `${tt.y.length}/${PARTY.length}` : "");
+          }));
+      }),
+      h("div", { class: "legend" },
+        h("span", {}, h("i", { style: "background:color-mix(in srgb, var(--yes) 25%, var(--none))" }), "A few can play"),
+        h("span", {}, h("i", { style: "background:var(--yes)" }), "Most of the party"),
+        h("span", {}, h("i", { style: "background:var(--yes);box-shadow:inset 0 0 0 2px var(--gold)" }), "Everyone"),
+        h("span", {}, "Top half afternoon, bottom half evening. Tap a day for details.")),
+      S.selDay && S.selDay >= t ? dayInfo(S.selDay) : null,
+    );
+  }
+  function dayInfo(date) {
+    return h("div", { class: "dayinfo" },
+      h("h3", {}, fmt(date, LONG)),
+      SLOTS.map(sl => {
+        const set = sessionOn(date, sl.id);
+        return h("div", { class: "slotrow" },
+          h("div", { class: "slotrow-h" },
+            h("span", { class: "slot", style: "font-size:.98rem;color:var(--ink)" }, icon(sl.icon), `${sl.label} (${sl.hint})`),
+            set ? h("button", { class: "btn small", type: "button", onclick: () => openSession(set) }, "Session set · edit")
+                : h("button", { class: "btn small", type: "button", onclick: () => openSession(null, date, sl.id) }, icon("sword"), "Schedule")),
+          h("div", { class: "pcs" }, PARTY.map(p => stateChip(p, getState(p.id, date, sl.id)))));
+      }));
+  }
+
+  function goMine() {
+    S.view = "mine"; store.set("view", "mine");
+    if (!S.me) S.pickingMe = true;
+    render();
+    (S.me ? $("#mineView") : $("#who")).scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // ---- session dialog ----
+  const dlg = $("#dlg");
+  let F = null;
+  function openSession(s, date, slot) {
+    F = s ? { ...s, armed: false } : { id: null, date: date || addDays(today(), 7), slot: slot || "e", time: slotById(slot || "e").time, where: "", notes: "", createdAt: null, armed: false };
+    $("#s-title").textContent = s ? "Edit session" : "Set the session";
+    $("#s-date").value = F.date;
+    $("#s-date").min = today();
+    $("#s-time").value = F.time;
+    $("#s-where").value = F.where;
+    $("#s-notes").value = F.notes;
+    $("#s-del").hidden = !s;
+    $("#s-del").textContent = "Cancel session";
+    $("#s-del").classList.remove("armed");
+    showErr("");
+    renderSlotPick(); renderAttend();
+    dlg.showModal();
+  }
+  function renderSlotPick() {
+    $("#s-slot").replaceChildren(...SLOTS.map(sl => h("button", {
+      class: "segb", type: "button", "aria-pressed": String(F.slot === sl.id),
+      onclick: () => {
+        const prevDefault = slotById(F.slot).time;
+        F.slot = sl.id;
+        if ($("#s-time").value === prevDefault || !$("#s-time").value) $("#s-time").value = sl.time;
+        renderSlotPick(); renderAttend();
+      },
+    }, icon(sl.icon), sl.label)));
+  }
+  function renderAttend() {
+    const date = $("#s-date").value;
+    const box = $("#s-attend");
+    if (!DATE_RE.test(date)) { box.hidden = true; return; }
+    box.hidden = false;
+    const t = tallyFor(date, F.slot);
+    box.replaceChildren(h("strong", {}, `${t.y.length} of ${PARTY.length} can play ${fmt(date, SHORT)} ${slotById(F.slot).label.toLowerCase()}`),
+      h("div", { class: "pcs" }, PARTY.map(p => stateChip(p, getState(p.id, date, F.slot)))));
+  }
+  function showErr(msg) { const e = $("#s-err"); e.textContent = msg; e.hidden = !msg; }
+  function writeError(err) {
+    const code = err && err.code;
+    if (code === "permission-denied") return "The party records didn't accept that change. Reload the page and try again.";
+    if (code === "resource-exhausted") return "The free daily limit is used up. Try again tomorrow.";
+    return "Couldn't save that change. Check your connection and try again.";
+  }
+  $("#s-date").addEventListener("change", renderAttend);
+  $("#s-x").addEventListener("click", () => dlg.close());
+  $("#s-cancel").addEventListener("click", () => dlg.close());
+  dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+  $("#sessForm").addEventListener("submit", e => {
+    e.preventDefault();
+    if (!backend) return;
+    const date = $("#s-date").value, time = $("#s-time").value;
+    if (!DATE_RE.test(date)) return showErr("Choose the day of the session.");
+    if (!TIME_RE.test(time)) return showErr("Choose a start time.");
+    const now = Date.now();
+    const data = { date, slot: F.slot, time, where: $("#s-where").value.trim().slice(0, 80), notes: $("#s-notes").value.trim().slice(0, 500), createdAt: F.createdAt || now, updatedAt: now };
+    backend.saveSession(S.party, F.id, data).catch(err => toast(writeError(err)));
+    const edited = !!F.id;
+    dlg.close();
+    S.view = "best"; store.set("view", "best");
+    render();
+    toast(edited ? "Session updated" : "Session set. Roll for initiative!");
+  });
+  $("#s-del").addEventListener("click", () => {
+    const btn = $("#s-del");
+    if (!F.armed) { F.armed = true; btn.textContent = "Tap again to cancel it"; btn.classList.add("armed"); return; }
+    backend.deleteSession(S.party, F.id).catch(err => toast(writeError(err)));
+    dlg.close();
+    toast("Session cancelled");
+  });
+
+  // Calendar file so each player can drop the session into their own calendar app.
+  function downloadIcs(s) {
+    const [hh, mm] = s.time.split(":").map(Number);
+    const start = parse(s.date); start.setHours(hh, mm);
+    const end = new Date(start.getTime() + 4 * 3600e3);
+    const stamp = d => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+    const esc = v => v.replace(/[\\,;]/g, m => "\\" + m).replace(/\n/g, "\\n");
+    const lines = [
+      "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Gather the Party//EN", "BEGIN:VEVENT",
+      `UID:${s.id || s.date}@gather-the-party`, `DTSTAMP:${stamp(new Date())}`,
+      `DTSTART:${stamp(start)}`, `DTEND:${stamp(end)}`, "SUMMARY:D&D session",
+      s.where ? `LOCATION:${esc(s.where)}` : null, s.notes ? `DESCRIPTION:${esc(s.notes)}` : null,
+      "END:VEVENT", "END:VCALENDAR",
+    ].filter(Boolean);
+    const url = URL.createObjectURL(new Blob([lines.join("\r\n")], { type: "text/calendar" }));
+    const a = h("a", { href: url, download: `dnd-session-${s.date}.ics` });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+
+  // ---- top-level controls ----
+  for (const b of document.querySelectorAll(".tab")) b.addEventListener("click", () => {
+    S.view = b.dataset.view; store.set("view", S.view);
+    if (S.view === "mine" && !S.me) S.pickingMe = true;
+    render();
+  });
+  $("#markBtn").addEventListener("click", goMine);
+  let lastDay = today();
+  setInterval(() => { if (today() !== lastDay) { lastDay = today(); render(); } }, 60000);
+
+  // ---- party code ----
+  // The code is never stored or sent as-is: its SHA-256 hash names the party's folder
+  // in the database. The rules made on setup.html allow only that one folder.
+  // setup.html hashes codes the same way; keep the two in step.
+  async function partyId(code) {
+    const norm = code.trim().toLowerCase().replace(/\s+/g, " ");
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("gather-the-party:" + norm));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+  function showCodeErr(msg) { const e = $("#codeErr"); e.textContent = msg; e.hidden = !msg; }
+  $("#lockForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!backend) return;
+    const code = $("#codeInput").value;
+    if (!code.trim()) return showCodeErr("Type the party code first.");
+    showCodeErr("");
+    const btn = $("#codeBtn");
+    btn.disabled = true;
+    try {
+      const id = await partyId(code);
+      await backend.check(id);
+      store.set(backend.key, id);
+      $("#codeInput").value = "";
+      openParty(id);
+    } catch (err) {
+      const c = err && err.code;
+      if (c === "permission-denied") showCodeErr("The tavern door stays shut: that's not the party code. Check with your DM.");
+      else showCodeErr("Couldn't reach the party's records. Check your internet connection and try again." + (c ? ` (${c})` : ""));
+    } finally {
+      btn.disabled = false;
+    }
+  });
+  $("#lockBtn").addEventListener("click", () => {
+    unwatch?.(); unwatch = null;
+    store.set(backend.key, null);
+    S.party = null; S.avail = {}; S.sessions = []; S.status = "locked";
+    render();
+  });
+
+  // ---- data: Firebase Firestore, or a pretend party for ?demo ----
+  let backend = null;
+  let unwatch = null;
+  let tidied = false;
+
+  function openParty(id) {
+    S.party = id; S.status = "loading"; render();
+    unwatch?.();
+    let got = 0;
+    const ready = () => { if (++got >= 2 && S.status !== "ready") { S.status = "ready"; } };
+    unwatch = backend.watch(id, avail => {
+      S.avail = Object.fromEntries(Object.entries(avail).filter(([k]) => seatById(k)).map(([k, v]) => [k, cleanDays(v && v.days)]));
+      ready(); tidy(); render();
+    }, sessions => {
+      S.sessions = sessions.map(x => cleanSession(x.id, x)).filter(Boolean);
+      ready(); render();
+    }, err => {
+      if (err && err.code === "permission-denied") {
+        store.set(backend.key, null);
+        S.party = null; S.status = "locked"; render();
+        showCodeErr("The party code has changed. Enter the new code.");
+      } else if (S.status !== "ready") { S.status = "error"; render(); }
+    });
+  }
+  // Drop my own answers for days more than a month gone so my sheet stays small.
+  function tidy() {
+    if (tidied || !S.me || !S.avail[S.me]) return;
+    tidied = true;
+    const cutoff = addDays(today(), -30);
+    const old = Object.keys(S.avail[S.me]).filter(d => d < cutoff);
+    if (old.length) backend.setDays(S.party, S.me, Object.fromEntries(old.map(d => [d, null]))).catch(() => {});
+  }
+
+  function firebaseBackend(fs, db) {
+    const availCol = id => fs.collection(db, "parties", id, "avail");
+    const sessCol = id => fs.collection(db, "parties", id, "sessions");
+    return {
+      key: "party",
+      async check(id) { await fs.getDocsFromServer(fs.query(availCol(id), fs.limit(1))); },
+      watch(id, onAvail, onSessions, onErr) {
+        const u1 = fs.onSnapshot(availCol(id), snap => onAvail(Object.fromEntries(snap.docs.map(d => [d.id, d.data()]))), onErr);
+        const u2 = fs.onSnapshot(sessCol(id), snap => onSessions(snap.docs.map(d => ({ id: d.id, ...d.data() }))), onErr);
+        return () => { u1(); u2(); };
+      },
+      setDays(id, seat, patch) {
+        const days = {};
+        for (const [d, v] of Object.entries(patch)) days[d] = v ? v : fs.deleteField();
+        return fs.setDoc(fs.doc(availCol(id), seat), { days, updatedAt: Date.now() }, { merge: true });
+      },
+      saveSession(id, sid, data) { return fs.setDoc(sid ? fs.doc(sessCol(id), sid) : fs.doc(sessCol(id)), data); },
+      deleteSession(id, sid) { return fs.deleteDoc(fs.doc(sessCol(id), sid)); },
+    };
+  }
+
+  function demoBackend() {
+    const K = "demoData";
+    let data = store.get(K);
+    if (!data || data.v !== 1) {
+      // Made-up answers for the next six weeks, with a couple of nights that work for nearly everyone.
+      let seed = 42; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+      const avail = {};
+      for (const p of PARTY) {
+        if (p.id === "john") continue; // leave one seat for you to try
+        const days = {};
+        for (let i = 1; i <= 42; i++) {
+          const d = addDays(today(), i), wd = parse(d).getDay();
+          const weekend = wd === 5 || wd === 6 || wd === 0;
+          const pick = () => { const r = rnd(); return weekend ? (r < .55 ? "y" : r < .75 ? "m" : "n") : (r < .2 ? "y" : r < .35 ? "m" : r < .6 ? "n" : "-"); };
+          const v = pick() + pick();
+          if (v !== "--") days[d] = v;
+        }
+        avail[p.id] = { days };
+      }
+      const firstSat = (() => { let d = addDays(today(), 8); while (parse(d).getDay() !== 6) d = addDays(d, 1); return d; })();
+      for (const p of PARTY) if (avail[p.id]) avail[p.id].days[firstSat] = "my";
+      data = { v: 1, avail, sessions: {} };
+      store.set(K, data);
+    }
+    const subs = new Set();
+    const emit = () => { store.set(K, data); for (const s of subs) { s.a(structuredClone(data.avail)); s.s(Object.entries(data.sessions).map(([id, x]) => ({ id, ...x }))); } };
+    return {
+      key: "demoParty",
+      async check() {},
+      watch(id, a, s) { const sub = { a, s }; subs.add(sub); setTimeout(emit, 150); return () => subs.delete(sub); },
+      async setDays(id, seat, patch) {
+        const days = { ...(data.avail[seat]?.days || {}) };
+        for (const [d, v] of Object.entries(patch)) if (v) days[d] = v; else delete days[d];
+        data.avail[seat] = { days }; emit();
+      },
+      async saveSession(id, sid, x) { data.sessions[sid || "s" + Date.now()] = x; emit(); },
+      async deleteSession(id, sid) { delete data.sessions[sid]; emit(); },
+    };
+  }
+
+  render();
+  (async () => {
+    if (new URLSearchParams(location.search).has("demo")) {
+      $("#demoBar").hidden = false;
+      backend = demoBackend();
+    } else {
+      const cfg = window.PARTY_CONFIG;
+      if (!cfg || !cfg.apiKey || !cfg.projectId) { S.status = "setup"; render(); return; }
+      const FIREBASE = "https://www.gstatic.com/firebasejs/10.12.2/";
+      try {
+        const [app, fs] = await Promise.all([import(FIREBASE + "firebase-app.js"), import(FIREBASE + "firebase-firestore.js")]);
+        const fbApp = app.initializeApp(cfg);
+        let db;
+        try { db = fs.initializeFirestore(fbApp, { localCache: fs.persistentLocalCache({ tabManager: fs.persistentMultipleTabManager() }) }); }
+        catch { db = fs.getFirestore(fbApp); }
+        backend = firebaseBackend(fs, db);
+      } catch {
+        S.status = "error"; render(); return;
+      }
+    }
+    const saved = store.get(backend.key);
+    if (typeof saved === "string" && /^[0-9a-f]{64}$/.test(saved)) openParty(saved);
+    else { S.status = "locked"; render(); }
+  })();
+})();
+</script>
+</body>
+</html>
