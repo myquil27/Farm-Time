@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Party Code Setup</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#2a2244">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700;800&family=Cinzel:wght@500;600;700&display=swap">
+<style>
+/* Layout: a moonlit castle scene across the top holds the next session (or the best day so far);
+   below it, parchment cards: best days ranked, your own availability, and the whole party's calendar */
+:root {
+  --bg: #f3ead9;
+  --surface: #fffaf0;
+  --ink: #2a1f17;
+  --muted: #76624d;
+  --line: #e2d3b7;
+  --accent: #8e2424;
+  --accent-ink: #fff6e6;
+  --accent-soft: #f2e0d0;
+  --gold: #b07d1e;
+  --gold-soft: #f5e6c2;
+  --yes: #2f7a4b;
+  --yes-soft: #d8ecdc;
+  --maybe: #a86e12;
+  --maybe-soft: #f6e5c0;
+  --no: #9c3a31;
+  --no-soft: #f2d9d3;
+  --none: #e8dcc5;
+  --hero-ink: #fff3dc;
+  --sky-top: #2a2244;
+  --sky-mid: #5a3b62;
+  --sky-low: #b56c5c;
+  --moon: #fbe9bf;
+  --mtn-far: #5b4566;
+  --mtn-mid: #3e2f4c;
+  --castle: #2a2036;
+  --window: #ffc95e;
+  --dragon: #241b30;
+  --star-o: .75;
+  --shadow-1: rgb(70 40 20 / .07);
+  --shadow-2: rgb(70 40 20 / .12);
+  --scrim: rgb(25 15 10 / .55);
+  --f-display: "Cinzel", "Trajan Pro", Georgia, serif;
+  --f-body: "Alegreya Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15121b; --surface: #211c28; --ink: #f1e7d6; --muted: #b3a48f; --line: #352d3d;
+    --accent: #e57a63; --accent-ink: #1b0f0c; --accent-soft: #3a2424; --gold: #e9b64c; --gold-soft: #3a2f18;
+    --yes: #73d08f; --yes-soft: #1d3326; --maybe: #e9b85a; --maybe-soft: #3a2f17; --no: #f08b7d; --no-soft: #3e211d; --none: #362e3d;
+    --sky-top: #0b0b1a; --sky-mid: #191732; --sky-low: #2c2340;
+    --moon: #f3e6c4; --mtn-far: #262038; --mtn-mid: #1a1528; --castle: #0f0c17; --window: #ffbf47; --dragon: #07060c; --star-o: 1;
+    --shadow-1: rgb(0 0 0 / .25); --shadow-2: rgb(0 0 0 / .4); --scrim: rgb(0 0 0 / .65);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15121b; --surface: #211c28; --ink: #f1e7d6; --muted: #b3a48f; --line: #352d3d;
+  --accent: #e57a63; --accent-ink: #1b0f0c; --accent-soft: #3a2424; --gold: #e9b64c; --gold-soft: #3a2f18;
+  --yes: #73d08f; --yes-soft: #1d3326; --maybe: #e9b85a; --maybe-soft: #3a2f17; --no: #f08b7d; --no-soft: #3e211d; --none: #362e3d;
+  --sky-top: #0b0b1a; --sky-mid: #191732; --sky-low: #2c2340;
+  --moon: #f3e6c4; --mtn-far: #262038; --mtn-mid: #1a1528; --castle: #0f0c17; --window: #ffbf47; --dragon: #07060c; --star-o: 1;
+  --shadow-1: rgb(0 0 0 / .25); --shadow-2: rgb(0 0 0 / .4); --scrim: rgb(0 0 0 / .65);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; padding-bottom: env(safe-area-inset-bottom, 0px); background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16.5px; line-height: 1.5; }
+:focus-visible { outline: 2.5px solid var(--gold); outline-offset: 2px; }
+h1, h2, h3 { text-wrap: balance; font-weight: 600; font-family: var(--f-display); letter-spacing: .01em; }
+svg.ic { width: 16px; height: 16px; flex: none; }
+
+/* ---------- Hero ---------- */
+.hero { position: relative; overflow: hidden; color: var(--hero-ink); background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 58%, var(--sky-low) 100%); padding-inline: 16px; padding-block: calc(18px + env(safe-area-inset-top, 0px)) 210px; }
+.scene { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 210px; display: block; }
+.scene .stars { fill: #fff6df; opacity: var(--star-o); }
+.scene .moon { fill: var(--moon); }
+.scene .far { fill: var(--mtn-far); }
+.scene .mid { fill: var(--mtn-mid); }
+.scene .castle { fill: var(--castle); }
+.scene .win { fill: var(--window); }
+.scene .dragon { fill: var(--dragon); }
+.scene .ground { fill: var(--bg); }
+.hero-in { position: relative; max-width: 900px; margin: 0 auto; display: grid; gap: 26px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 1.2rem; letter-spacing: .04em; }
+.brand .mark { width: 38px; height: 38px; border-radius: 11px; background: rgb(255 255 255 / .1); border: 1px solid rgb(255 236 200 / .25); display: grid; place-items: center; color: #e9b64c; }
+.greet { display: grid; gap: 8px; max-width: 680px; }
+.eyebrow { font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; color: #e9c27a; }
+.greet h1 { font-size: clamp(1.75rem, 5.2vw, 2.7rem); line-height: 1.15; margin: 0; text-shadow: 0 2px 18px rgb(0 0 0 / .35); }
+.greet .sub { margin: 0; color: var(--hero-ink); opacity: .86; font-size: 1.06rem; max-width: 60ch; }
+.sub { margin: 0; color: var(--muted); max-width: 64ch; }
+.sub strong { color: var(--ink); }
+
+/* ---------- Buttons ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-weight: 700; border-radius: 12px; padding: 9px 16px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; min-height: 44px; transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease; text-decoration: none; }
+.btn:hover { box-shadow: 0 3px 10px var(--shadow-2); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; box-shadow: 0 3px 10px var(--shadow-2); }
+.btn.gold { background: #e9b64c; color: #2a1a05; border-color: transparent; box-shadow: 0 3px 14px rgb(0 0 0 / .25); }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--muted); box-shadow: none; }
+.btn.ghost:hover { color: var(--ink); background: var(--accent-soft); }
+.btn.small { min-height: 36px; padding: 6px 12px; font-size: .92rem; }
+.btn.icon { width: 44px; padding: 0; }
+.btn.danger { background: transparent; color: var(--no); border-color: var(--no); }
+.btn.danger.armed { background: var(--no); color: var(--surface); }
+.btn:disabled { opacity: .55; cursor: default; }
+
+/* ---------- Page body ---------- */
+.wrap { max-width: 900px; margin: 0 auto; padding-inline: 16px; padding-block: 0 80px; display: grid; gap: 20px; position: relative; }
+.card { background: var(--surface); border-radius: 18px; border: 1px solid var(--line); box-shadow: 0 1px 2px var(--shadow-1), 0 10px 30px var(--shadow-2); }
+.lead { margin-top: -96px; padding: 20px; display: grid; gap: 14px; }
+.section-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.section-h h2 { font-size: 1.25rem; margin: 0; }
+.lock-form { display: grid; gap: 14px; max-width: 480px; }
+.lock-form h2 { font-size: 1.35rem; margin: 0; }
+.code-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.code-row input { flex: 1 1 200px; font-size: 1.05rem; }
+.notice { background: var(--gold-soft); border-radius: 12px; padding: 11px 14px; font-size: .95rem; }
+.foot { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding-top: 6px; }
+.err { color: var(--no); font-weight: 700; margin: 0; }
+.hint { font-size: .9rem; color: var(--muted); margin: 0; font-weight: 400; }
+
+/* Who-are-you picker */
+.me-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.seats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.seat { display: flex; align-items: center; gap: 10px; font: inherit; font-weight: 700; text-align: left; padding: 10px 12px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; min-height: 52px; }
+.seat:hover { border-color: var(--gold); }
+.seat[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+
+/* Player tokens: each seat has a fixed hue */
+.tok { --h: 30; width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; font-weight: 800; font-size: .74rem; letter-spacing: -.02em; color: #fff; background: hsl(var(--h) 48% 40%); box-shadow: inset 0 0 0 2px hsl(var(--h) 60% 70% / .55); }
+.pc { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 2px; border-radius: 999px; font-weight: 700; font-size: .9rem; background: var(--none); color: var(--ink); max-width: 100%; }
+.pc .tok { width: 24px; height: 24px; font-size: .64rem; }
+.pc .st { display: inline-flex; }
+.pc[data-s="y"] { background: var(--yes-soft); }
+.pc[data-s="y"] .st { color: var(--yes); }
+.pc[data-s="m"] { background: var(--maybe-soft); }
+.pc[data-s="m"] .st { color: var(--maybe); }
+.pc[data-s="n"] { background: var(--no-soft); color: var(--muted); }
+.pc[data-s="n"] .st { color: var(--no); }
+.pc[data-s="-"] { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line); color: var(--muted); }
+.pcs { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); width: fit-content; max-width: 100%; overflow-x: auto; }
+.tab { display: inline-flex; align-items: center; gap: 7px; font: inherit; font-weight: 700; border: 0; background: transparent; color: var(--muted); padding: 8px 14px; border-radius: 10px; cursor: pointer; min-height: 40px; white-space: nowrap; }
+.tab[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+/* Best days */
+.list { display: grid; gap: 12px; }
+.cand { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px; }
+.cand.top { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 10px 30px var(--shadow-2); }
+.datebox { display: grid; text-align: center; border-radius: 10px; overflow: hidden; font-variant-numeric: tabular-nums; background: var(--bg); border: 1px solid var(--line); }
+.datebox .dow { background: var(--accent); color: var(--accent-ink); font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 800; padding: 3px 0; }
+.datebox .dnum { font-family: var(--f-display); font-weight: 700; font-size: 1.45rem; line-height: 1.3; }
+.datebox .mon { font-size: .66rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 700; padding-bottom: 4px; }
+.cand .body { display: grid; gap: 6px; min-width: 0; }
+.cand h3 { margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.slot { display: inline-flex; align-items: center; gap: 5px; font-family: var(--f-body); font-weight: 700; font-size: .88rem; color: var(--muted); letter-spacing: 0; }
+.tally { font-weight: 700; font-size: .95rem; }
+.tally .y { color: var(--yes); }
+.tally .m { color: var(--maybe); }
+.side { display: grid; justify-items: center; gap: 8px; }
+.d20 { position: relative; width: 52px; height: 52px; display: grid; place-items: center; color: var(--gold); }
+.d20 svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.d20 b { position: relative; font-family: var(--f-display); font-size: 1rem; color: var(--ink); top: 3px; }
+.d20.nat svg { color: var(--gold); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--gold) 60%, transparent)); }
+.badge { display: inline-flex; align-items: center; gap: 5px; font-family: var(--f-body); font-size: .74rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 2px 9px; border-radius: 999px; background: var(--gold-soft); color: var(--gold); }
+.badge.set { background: var(--accent-soft); color: var(--accent); }
+.empty { padding: 24px 22px; display: grid; gap: 12px; justify-items: start; }
+.empty h2 { margin: 0; font-size: 1.25rem; }
+
+/* Upcoming sessions */
+.quest { padding: 18px; display: grid; gap: 12px; border-color: var(--accent); }
+.quest-top { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 14px; align-items: start; }
+.quest h3 { margin: 0; font-size: 1.15rem; }
+.quest .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--muted); font-size: .95rem; }
+.quest .meta span { display: inline-flex; align-items: center; gap: 6px; }
+.quest .notes { white-space: pre-line; overflow-wrap: anywhere; }
+.row-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Calendars */
+.cal { padding: 18px; display: grid; gap: 14px; }
+.cal-head { display: flex; align-items: center; gap: 6px; }
+.cal-head h2 { margin: 0 auto 0 0; font-size: 1.25rem; }
+.grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.wd { font: inherit; font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); text-align: center; font-weight: 800; padding: 4px 0; border: 0; background: transparent; border-radius: 8px; }
+button.wd { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+button.wd:hover { background: var(--accent-soft); color: var(--ink); }
+.day { min-width: 0; min-height: 78px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); padding: 4px; display: flex; flex-direction: column; gap: 3px; cursor: pointer; font: inherit; color: inherit; text-align: left; }
+.day:hover:not(:disabled) { border-color: var(--gold); }
+.day:disabled { cursor: default; opacity: .45; }
+.day.out { visibility: hidden; }
+.day .n { font-size: .8rem; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 22px; height: 22px; display: grid; place-items: center; border-radius: 999px; align-self: flex-start; }
+.day.today .n { background: var(--accent); color: var(--accent-ink); }
+.day.sel { border-color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.day.has-session .n { box-shadow: 0 0 0 2px var(--gold); }
+.half { flex: 1; min-height: 16px; border-radius: 5px; display: flex; align-items: center; justify-content: center; gap: 3px; font-size: .68rem; font-weight: 800; background: var(--none); color: var(--muted); }
+.half[data-s="y"] { background: var(--yes); color: var(--surface); }
+.half[data-s="m"] { background: var(--maybe); color: var(--surface); }
+.half[data-s="n"] { background: var(--no-soft); color: var(--no); }
+.half .ic { width: 12px; height: 12px; }
+.heat { flex: 1; min-height: 16px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 800; font-variant-numeric: tabular-nums; background: color-mix(in srgb, var(--yes) calc(var(--p, 0) * 100%), var(--none)); color: var(--ink); }
+.heat.hot { color: var(--surface); }
+.heat.full { box-shadow: inset 0 0 0 2px var(--gold); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .88rem; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 16px; height: 12px; border-radius: 4px; display: inline-block; background: var(--none); }
+
+/* Brush (mark my days) */
+.brushbar { display: grid; gap: 10px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.segb { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-weight: 700; font-size: .93rem; padding: 7px 12px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; min-height: 40px; }
+.segb:hover { border-color: var(--gold); }
+.segb[aria-pressed="true"] { border-color: var(--ink); background: var(--surface); box-shadow: 0 2px 8px var(--shadow-2); }
+.segb[data-b="y"] .ic { color: var(--yes); }
+.segb[data-b="m"] .ic { color: var(--maybe); }
+.segb[data-b="n"] .ic { color: var(--no); }
+.segb[data-b="-"] .ic { color: var(--muted); }
+.seg-l { font-size: .78rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); align-self: center; min-width: 74px; }
+
+/* Day details (party calendar) */
+.dayinfo { display: grid; gap: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+.dayinfo h3 { margin: 0; font-size: 1.1rem; }
+.slotrow { display: grid; gap: 8px; padding: 12px; border-radius: 12px; background: var(--bg); }
+.slotrow-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+
+@media (max-width: 560px) {
+  .cal { padding: 14px 10px; }
+  .grid { gap: 3px; }
+  .day { min-height: 64px; padding: 3px; border-radius: 8px; }
+  .half .ic, .half .t { display: none; }
+  .heat { font-size: .62rem; }
+  .cand { grid-template-columns: 50px minmax(0, 1fr); }
+  .cand .side { grid-column: 1 / -1; grid-template-columns: auto 1fr auto; justify-items: start; align-items: center; border-top: 1px solid var(--line); padding-top: 10px; }
+  .cand .side .btn { justify-self: end; }
+  .d20 { width: 40px; height: 40px; }
+  .d20 b { font-size: .85rem; }
+  .seg-l { min-width: 0; width: 100%; }
+}
+
+/* ---------- Dialog ---------- */
+dialog { border: 1px solid var(--line); border-radius: 20px; padding: 0; background: var(--surface); color: var(--ink); width: min(540px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); box-shadow: 0 30px 80px var(--shadow-2); }
+dialog::backdrop { background: var(--scrim); }
+.form { display: grid; gap: 18px; padding: 22px; }
+.form-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.form h2 { margin: 0; font-size: 1.4rem; }
+fieldset { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 8px; }
+legend, .lab { font-weight: 800; padding: 0; margin-bottom: 8px; font-size: .97rem; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field .lab { margin: 0; }
+input[type="text"], input[type="date"], input[type="time"], textarea { font: inherit; padding: 10px 13px; border: 1.5px solid var(--line); border-radius: 11px; background: var(--bg); color: var(--ink); width: 100%; min-width: 0; }
+input:focus, textarea:focus { border-color: var(--gold); outline: none; }
+textarea { resize: vertical; min-height: 76px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.attend { display: grid; gap: 6px; background: var(--bg); border-radius: 12px; padding: 12px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+.actions .left { margin-right: auto; }
+
+.demo { background: #e9b64c; color: #2a1a05; text-align: center; font-weight: 700; padding: 6px 12px; font-size: .9rem; }
+.demo a { color: inherit; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 11px 20px; border-radius: 12px; font-weight: 700; box-shadow: 0 10px 30px var(--shadow-2); max-width: calc(100vw - 32px); z-index: 10; }
+@media (prefers-reduced-motion: no-preference) {
+  .toast { animation: rise .22s ease-out; }
+  @keyframes rise { from { transform: translate(-50%, 10px); opacity: 0; } }
+  .scene .dragon { animation: glide 14s ease-in-out infinite alternate; }
+  @keyframes glide { to { transform: translate(-60px, 10px); } }
+  .scene .win { animation: flicker 3.2s ease-in-out infinite alternate; }
+  @keyframes flicker { 50% { opacity: .78; } }
+}
+</style>
+<style>
+.setup { max-width: 660px; margin: 0 auto; padding-inline: 16px; padding-block: calc(28px + env(safe-area-inset-top, 0px)) 80px; display: grid; gap: 20px; }
+.setup .brand { color: var(--ink); }
+.setup .brand .mark { background: var(--sky-top); color: #e9b64c; }
+.setup h1 { font-size: clamp(1.7rem, 5vw, 2.3rem); margin: 0; line-height: 1.15; }
+.setup .card { padding: 22px; display: grid; gap: 14px; }
+.setup h2 { font-size: 1.2rem; margin: 0; }
+.setup ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; }
+.setup code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .88em; background: var(--accent-soft); padding: 1px 6px; border-radius: 6px; }
+.rules { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .78rem; line-height: 1.5; min-height: 260px; white-space: pre; overflow: auto; }
+.setup a { color: var(--accent); font-weight: 700; }
+.ok { color: var(--yes); font-weight: 800; margin: 0; align-self: center; }
+</style>
+</head>
+<body>
+<main class="setup">
+  <p class="brand"><span class="mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5 20.2 7.25v9.5L12 21.5 3.8 16.75v-9.5z" stroke-width="1.6"/><path d="M12 7.4 16.6 15.2H7.4zM12 2.5v4.9M20.2 7.25 16.6 15.2M3.8 7.25 7.4 15.2M7.4 15.2 12 21.5l4.6-6.3M3.8 16.75l3.6-1.55M20.2 16.75l-3.6-1.55" stroke-width="1.1"/></svg></span>Gather the Party</p>
+  <h1>Set the party code</h1>
+  <p class="sub">This page is for whoever runs Gather the Party. Choose the one code your group will use. The page turns it into database rules for you to paste into Firebase. Your code never leaves this device, and only the code you choose here will work.</p>
+
+  <section class="card">
+    <form id="codeForm" class="lock-form" novalidate>
+      <label class="field"><span class="lab">Party code</span>
+        <input type="text" id="code1" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="e.g. goblin tavern dice 20"></label>
+      <label class="field"><span class="lab">Type it again</span>
+        <input type="text" id="code2" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></label>
+      <p class="hint">At least 8 characters. Three or four words plus a number is easy to share and hard to guess. Capital letters and extra spaces don't matter.</p>
+      <p class="err" id="err" hidden></p>
+      <div><button class="btn primary" type="submit">Make my database rules</button></div>
+    </form>
+  </section>
+
+  <section class="card" id="out" hidden>
+    <h2>Paste these rules into Firebase</h2>
+    <ol>
+      <li>Open <a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a> and your Gather the Party project (not Farm Time).</li>
+      <li>Go to <b>Build → Firestore Database → Rules</b>.</li>
+      <li>Delete everything in the rules box, paste the rules below, and click <b>Publish</b>.</li>
+      <li>Wait a minute, then open Gather the Party and enter your code.</li>
+    </ol>
+    <textarea class="rules" id="rules" readonly aria-label="Database rules"></textarea>
+    <div class="actions" style="justify-content:flex-start"><button class="btn primary" type="button" id="copy">Copy rules</button><span class="ok" id="copied" hidden>Copied</span></div>
+    <p class="hint">Changing the code later: make new rules here and publish them. Everyone will need the new code, and answers saved under the old code won't appear under the new one.</p>
+  </section>
+</main>
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  // Same hashing as index.html; keep the two in step.
+  async function partyId(code) {
+    const norm = code.trim().toLowerCase().replace(/\s+/g, " ");
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("gather-the-party:" + norm));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+  const norm = v => v.trim().toLowerCase().replace(/\s+/g, " ");
+  function err(msg) { $("#err").textContent = msg; $("#err").hidden = !msg; }
+
+  $("#codeForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const a = $("#code1").value, b = $("#code2").value;
+    if (norm(a).length < 8) return err("Use at least 8 characters.");
+    if (norm(a) !== norm(b)) return err("The two codes don't match.");
+    err("");
+    let template;
+    try {
+      const res = await fetch("firestore.rules", { cache: "no-store" });
+      if (!res.ok) throw new Error();
+      template = await res.text();
+    } catch {
+      return err("Couldn't load the rules template. Open this page from the website and try again.");
+    }
+    if (!window.crypto || !crypto.subtle) return err("Open this page from its https:// address.");
+    const id = await partyId(a);
+    $("#rules").value = template
+      .replace(/^\/\/.*\n/gm, "")
+      .replace("service cloud.firestore", "// Gather the Party database rules: only the party code chosen on setup.html can read or add answers and sessions.\nservice cloud.firestore")
+      .replace("PARTY_ID_GOES_HERE", id);
+    $("#out").hidden = false;
+    $("#out").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  $("#copy").addEventListener("click", async () => {
+    const ta = $("#rules");
+    try { await navigator.clipboard.writeText(ta.value); }
+    catch { ta.focus(); ta.select(); document.execCommand && document.execCommand("copy"); }
+    $("#copied").hidden = false;
+    setTimeout(() => { $("#copied").hidden = true; }, 2500);
+  });
+})();
+</script>
+</body>
+</html>

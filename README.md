@@ -12,6 +12,7 @@ at the farm today, browse upcoming visits on a list or calendar, and plan their 
 | `config.js` | Your Firebase connection settings. The only file you edit. |
 | `setup.html` | Owner-only helper: choose the family code and get the database rules for it. |
 | `firestore.rules` | Rules template that `setup.html` fills in with your code. |
+| `dnd/` | **Gather the Party**, a separate D&D session planner built the same way. See [`dnd/README.md`](dnd/README.md). |
 | `farm-time.html` | The earlier claude.ai version (needs a Claude account). Not used by the website. |
 
 Trips are stored in **Firebase Firestore** (Google's free database), and the site is
